@@ -29,3 +29,10 @@ export function getBundleMap(request: Request, response: Response) {
   response.sendFile(pathToBundleMap);
 }
 
+export function getImage(request: Request, response: Response) {
+  console.log('getImage invoked');
+  const pathToImage = path.join(__dirname, '../../public', 'images', 'test.jpg');
+  console.log('pathToImage');
+  console.log(pathToImage);
+  response.sendFile(pathToImage);
+}
