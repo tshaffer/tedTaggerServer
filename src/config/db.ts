@@ -1,18 +1,21 @@
 import mongoose from 'mongoose';
 
-const connectDB = async () => {
-  console.log('uri is:');
-  console.log(process.env.MONGO_URI);
-  const conn = await mongoose.connect(
-    process.env.MONGO_URI,
-    {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true,
-    });
+export let connection: mongoose.Connection;
 
-  console.log(`MongoDB Connected`);
+import { tedTaggerConfiguration } from './config';
+
+async function connectDB() {
+
+  console.log('mongo uri is:');
+  console.log(tedTaggerConfiguration.MONGO_URI);
+  connection = await mongoose.createConnection(tedTaggerConfiguration.MONGO_URI, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  });
+  console.log(`MongoDB new db connected`);
+
+  mongoose.Promise = global.Promise;
 };
 
 export default connectDB;

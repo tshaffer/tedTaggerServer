@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 import { Routes } from './routes/routes';
 
 import {
+  getMediaItems,
   getVersion,
 } from './controllers';
 
@@ -46,6 +47,7 @@ class App {
 
     // app routes
     this.app.get('/api/v1/version', getVersion);
+    this.app.get('/api/v1/mediaItems', getMediaItems);
   }
 
   private config(): void {
