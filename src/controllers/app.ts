@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
 
 import { version } from '../version';
-import { getAllMediaItemsFromDb } from './dbInterface';
-import { MediaItem } from '../types';
+import {
+  getAllMediaItemsFromDb,
+  getAllTagsFromDb,
+} from './dbInterface';
+import { MediaItem, Tag } from '../types';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -16,4 +19,10 @@ export const getMediaItems = async (request: Request, response: Response, next: 
   console.log('getMediaItems');
   const mediaItems: MediaItem[] = await getAllMediaItemsFromDb();
   response.json(mediaItems);
+};
+
+export const getTags = async (request: Request, response: Response, next: any) => {
+  console.log('getTags');
+  const tags: Tag[] = await getAllTagsFromDb();
+  response.json(tags);
 };

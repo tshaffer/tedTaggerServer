@@ -10,6 +10,7 @@ import { Routes } from './routes/routes';
 
 import {
   getMediaItems,
+  getTags,
   getVersion,
 } from './controllers';
 
@@ -48,6 +49,7 @@ class App {
     // app routes
     this.app.get('/api/v1/version', getVersion);
     this.app.get('/api/v1/mediaItems', getMediaItems);
+    this.app.get('/api/v1/tags', getTags);
   }
 
   private config(): void {

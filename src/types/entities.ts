@@ -22,3 +22,8 @@ export interface MediaItem {
   geoData?: GeoData,
   people?: string[],
 }
+
+export interface Tag {
+  id: string;
+  label: string;
+}
