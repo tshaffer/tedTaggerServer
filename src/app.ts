@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 import { Routes } from './routes/routes';
 
 import {
+  addTag,
   getMediaItems,
   getTags,
   getVersion,
@@ -50,6 +51,9 @@ class App {
     this.app.get('/api/v1/version', getVersion);
     this.app.get('/api/v1/mediaItems', getMediaItems);
     this.app.get('/api/v1/tags', getTags);
+
+    this.app.post('/api/v1/addTag', addTag)
+
   }
 
   private config(): void {
