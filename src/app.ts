@@ -13,6 +13,7 @@ import {
   getMediaItems,
   getTags,
   getVersion,
+  updateTagsInMediaItem,
 } from './controllers';
 
 class App {
@@ -53,7 +54,7 @@ class App {
     this.app.get('/api/v1/tags', getTags);
 
     this.app.post('/api/v1/addTag', addTag)
-    // this.app.post('/api/v1/addTagToMediaItem', addTagToMediaItem)
+    this.app.post('/api/v1/updateTagsInMediaItem', updateTagsInMediaItem)
 
   }
 

@@ -5,6 +5,7 @@ import {
   createTagDocument,
   getAllMediaItemsFromDb,
   getAllTagsFromDb,
+  updateTagsInDbMediaItem,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
 
@@ -45,11 +46,15 @@ export const addTag = async (request: Request, response: Response, next: any) =>
   response.sendStatus(200);
 }
 
-export const addTagToMediaItem = (request: Request, response: Response, next: any) => {
+export const updateTagsInMediaItem = async (request: Request, response: Response, next: any) => {
 
-  console.log('addTagToMediaItem');
+  console.log('updateTagsInMediaItem');
   console.log(request.body);
 
-  const { mediaItemId, tagId } = request.body;
+  const { mediaItemId, tagIds } = request.body;
+
+  await updateTagsInDbMediaItem(mediaItemId, tagIds);
+
+  response.sendStatus(200);
 }
 
