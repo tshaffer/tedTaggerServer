@@ -33,14 +33,23 @@ export const addTag = async (request: Request, response: Response, next: any) =>
   console.log('addTag');
   console.log(request.body);
 
-  const { id, label } = request.body;
+  const { id, label, type } = request.body;
 
   const tag: Tag = {
     id,
     label,
+    type,
   };
   await createTagDocument(tag);
 
   response.sendStatus(200);
+}
+
+export const addTagToMediaItem = (request: Request, response: Response, next: any) => {
+
+  console.log('addTagToMediaItem');
+  console.log(request.body);
+
+  const { mediaItemId, tagId } = request.body;
 }
 

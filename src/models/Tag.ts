@@ -7,6 +7,7 @@ const TagSchema = new Schema(
   {
     id: { type: String, required: true, unique: true },
     label: { type: String, required: true, unique: true },
+    type: { type: String, required: true, unique: true },
   }
 );
 

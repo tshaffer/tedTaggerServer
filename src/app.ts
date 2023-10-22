@@ -53,6 +53,7 @@ class App {
     this.app.get('/api/v1/tags', getTags);
 
     this.app.post('/api/v1/addTag', addTag)
+    // this.app.post('/api/v1/addTagToMediaItem', addTagToMediaItem)
 
   }
 
