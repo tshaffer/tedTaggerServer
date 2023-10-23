@@ -57,57 +57,13 @@ export const createTagDocument = async (tag: Tag): Promise<Document | void> => {
 };
 
 // https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-export const updateTagsInDbMediaItem = async (mediaItemId: string, tagIds: string[]): Promise<any> => {
+export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
 
   const mediaItemModel = getMediaitemModel();
   const filter = { googleId: mediaItemId };
 
   const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
-  console.log('existingTagIds');
-  console.log((mediaItemDocument.toObject() as MediaItem).tagIds);
-
-  const newTagId = tagIds[tagIds.length - 1];
-  console.log('newTagId');
-  console.log(newTagId);
-
-  mediaItemDocument.get('tagIds').push(newTagId);
+  mediaItemDocument.get('tagIds').push(tagId);
   mediaItemDocument.markModified('tagIds');
   const newDocument: Document = await mediaItemDocument.save();
-  console.log('updated documents tagIds');
-  console.log(newDocument.get('tagIds'));
-  
-
-  // const update = { tagIds: tagIds };
-  // const doc = await mediaItemModel.findOneAndUpdate(filter, update, {
-  //   new: true
-  // });
-  // console.log('updated doc');
-  // console.log(doc);
-
-
-  // await mediaItemModel.findOne(filter).then((doc: any) => {
-  //   console.log(doc);
-  //   (doc as any).tagIds.push(newTagId);
-  //   (doc as any).save();
-  // });
-
-  /*
-    doc.get('tagIds').push('oink')
-    2
-    doc.get('tagIds')
-      (2) ['f6bafbfd-b162-4cb9-9e61-2d48a434af29', 'oink']
-    doc.save()
-  */
-  // await mediaItemModel.findOneAndUpdate(
-  //   filter,
-  //   { $push: { tagIds: newTagId}},
-  //   null,
-  //   function (error, success) {
-  //     if (error) {
-  //         console.log(error);
-  //     } else {
-  //         console.log(success);
-  //     }
-  // });
-
 }
