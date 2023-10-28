@@ -8,6 +8,7 @@ import {
   addTagToDbMediaItem,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
+import multer from 'multer';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -57,4 +58,29 @@ export const addTagToMediaItem = async (request: Request, response: Response, ne
 
   response.sendStatus(200);
 }
+
+export const uploadTagIconFile = async (request: Request, response: Response, next: any) => {
+
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'public/tagIconImages');
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname);
+    }
+  });
+  const upload = multer({ storage: storage }).single('file');
+  upload(request, response, function (err) {
+    if (err instanceof multer.MulterError) {
+      return response.status(500).json(err);
+    } else if (err) {
+      return response.status(500).json(err);
+    }
+    console.log('return from upload: ', request.file);
+    const responseData = {
+      file: request.file,
+    };
+  return response.status(200).send(responseData);
+  });
+};
 

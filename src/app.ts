@@ -14,6 +14,7 @@ import {
   getTags,
   getVersion,
   addTagToMediaItem,
+  uploadTagIconFile,
 } from './controllers';
 
 class App {
@@ -55,6 +56,7 @@ class App {
 
     this.app.post('/api/v1/addTag', addTag)
     this.app.post('/api/v1/addTagToMediaItem', addTagToMediaItem)
+    this.app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
 
   }
 
