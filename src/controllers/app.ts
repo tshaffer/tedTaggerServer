@@ -84,3 +84,15 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
   });
 };
 
+export const assignTagIconToTag = async (request: Request, response: Response, next: any) => {
+
+  console.log('assignTagIconToTag');
+
+  const { tagId, tagFileName } = request.body;
+
+  console.log(tagId, tagFileName);
+
+  // await addTagToDbMediaItem(mediaItemId, tagId);
+
+  response.sendStatus(200);
+}
