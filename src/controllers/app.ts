@@ -6,6 +6,7 @@ import {
   getAllMediaItemsFromDb,
   getAllTagsFromDb,
   addTagToDbMediaItem,
+  assignTagIconToDbTag,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
 import multer from 'multer';
@@ -88,11 +89,11 @@ export const assignTagIconToTag = async (request: Request, response: Response, n
 
   console.log('assignTagIconToTag');
 
-  const { tagId, tagFileName } = request.body;
+  const { tagId, iconFileName } = request.body;
 
-  console.log(tagId, tagFileName);
+  console.log(tagId, iconFileName);
 
-  // await addTagToDbMediaItem(mediaItemId, tagId);
+  await assignTagIconToDbTag(tagId, iconFileName);
 
   response.sendStatus(200);
 }

@@ -1,3 +1,4 @@
+import { isArray, isNil } from "lodash";
 import {
   getMediaitemModel,
   getTagModel,
@@ -67,3 +68,26 @@ export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): P
   mediaItemDocument.markModified('tagIds');
   const newDocument: Document = await mediaItemDocument.save();
 }
+
+export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
+
+  console.log(tagId, iconFileName);
+
+  const tagModel = getTagModel();
+
+  const filter = { id: tagId };
+  const tagDocument: Document = await tagModel.findOne(filter);
+  if (!isNil(tagDocument)) {
+    tagDocument.set('iconFileName', iconFileName); 
+    tagDocument.save();
+  }
+
+  // tagModel.find({ id: tagId })
+  //   , (err: any, tagDocs: any) => {
+  //     if (err) {
+  //       console.log(err);
+  //     } else
+  //       if (isArray(tagDocs) && tagDocs.length === 1) {
+  //       }
+  //   };
+  }
