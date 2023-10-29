@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 
+const sharp = require('sharp');
+
 import { version } from '../version';
 import {
   createTagDocument,
@@ -78,11 +80,26 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
       return response.status(500).json(err);
     }
     console.log('return from upload: ', request.file);
+    
+    const filePath: string = request.file!.path;
+    resizeIconFile(filePath);
+
     const responseData = {
       file: request.file,
     };
   return response.status(200).send(responseData);
   });
+};
+
+const resizeIconFile = async(filePath: string) => {
+  const sharpPromise: Promise<any> = sharp(filePath)
+    .resize(50)
+    .jpeg()
+    .toFile(filePath + '.foo');
+  sharpPromise
+    .then((x: any) => {
+      console.log(x);
+    });
 };
 
 export const assignTagIconToTag = async (request: Request, response: Response, next: any) => {
