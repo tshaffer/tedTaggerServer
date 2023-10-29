@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 
+import * as path from 'path';
+
 const sharp = require('sharp');
 
 import { version } from '../version';
@@ -80,22 +82,32 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
       return response.status(500).json(err);
     }
     console.log('return from upload: ', request.file);
-    
-    const filePath: string = request.file!.path;
-    resizeIconFile(filePath);
+
+    const inputFilePath: string = request.file!.path; // 'public/tagIconImages/morgan.png'
+    console.log(path.basename(inputFilePath)); // morgan.png
+    console.log(path.dirname(inputFilePath));  // public/tagIconImages
+    console.log(path.extname(inputFilePath));  // .png
+    console.log(path.parse(inputFilePath));  // base, dir, ext as above. name: 'morgan'
+    const iconFileName = path.parse(inputFilePath).name + '.jpg';
+    const outputFilePath: string = path.join(
+      path.dirname(inputFilePath),
+      iconFileName);
+    console.log(outputFilePath);
+    resizeIconFile(inputFilePath, outputFilePath);
 
     const responseData = {
       file: request.file,
+      iconFileName,
     };
-  return response.status(200).send(responseData);
+    return response.status(200).send(responseData);
   });
 };
 
-const resizeIconFile = async(filePath: string) => {
-  const sharpPromise: Promise<any> = sharp(filePath)
+const resizeIconFile = async (inputFilePath: string, outputFilePath: string) => {
+  const sharpPromise: Promise<any> = sharp(inputFilePath)
     .resize(50)
     .jpeg()
-    .toFile(filePath + '.foo');
+    .toFile(outputFilePath);
   sharpPromise
     .then((x: any) => {
       console.log(x);
