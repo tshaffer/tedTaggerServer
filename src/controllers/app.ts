@@ -105,7 +105,7 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
 
 const resizeIconFile = async (inputFilePath: string, outputFilePath: string) => {
   const sharpPromise: Promise<any> = sharp(inputFilePath)
-    .resize(50)
+    .resize(undefined, 50, { fit: 'contain' })
     .jpeg()
     .toFile(outputFilePath);
   sharpPromise
