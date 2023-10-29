@@ -78,16 +78,7 @@ export const assignTagIconToDbTag = async (tagId: string, iconFileName: string):
   const filter = { id: tagId };
   const tagDocument: Document = await tagModel.findOne(filter);
   if (!isNil(tagDocument)) {
-    tagDocument.set('iconFileName', iconFileName); 
+    tagDocument.set('iconFileName', iconFileName);
     tagDocument.save();
   }
-
-  // tagModel.find({ id: tagId })
-  //   , (err: any, tagDocs: any) => {
-  //     if (err) {
-  //       console.log(err);
-  //     } else
-  //       if (isArray(tagDocs) && tagDocs.length === 1) {
-  //       }
-  //   };
-  }
+}
