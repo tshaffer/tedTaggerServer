@@ -66,7 +66,21 @@ export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): P
   const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
   mediaItemDocument.get('tagIds').push(tagId);
   mediaItemDocument.markModified('tagIds');
-  const newDocument: Document = await mediaItemDocument.save();
+  return await mediaItemDocument.save();
+}
+
+export const addTagToDbMediaItems = async (mediaItemIds: string[], tagId: string): Promise<any> => {
+
+  // better db interface to do the this??
+
+  const promises: Promise<any>[] = [];
+  mediaItemIds.forEach((mediaItemId: string) => {
+    promises.push(addTagToDbMediaItem(mediaItemId, tagId));
+  });
+  return Promise.all(promises)
+  .then(() => {
+    return Promise.resolve();
+  })
 }
 
 export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
