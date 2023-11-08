@@ -17,6 +17,9 @@ import {
   addTagToMediaItems,
   uploadTagIconFile,
   assignTagIconToTag,
+  setViewSpecType,
+  setEndDate,
+  setStartDate,
 } from './controllers';
 
 class App {
@@ -61,6 +64,10 @@ class App {
     this.app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     this.app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
     this.app.post('/api/v1/assignTagIconToTag', assignTagIconToTag);
+
+    this.app.post('/api/v1/setViewSpecType', setViewSpecType);
+    this.app.post('/api/v1/setStartDate', setStartDate);
+    this.app.post('/api/v1/setEndDate', setEndDate);
 
   }
 

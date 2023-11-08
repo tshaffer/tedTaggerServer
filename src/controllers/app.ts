@@ -139,3 +139,42 @@ export const assignTagIconToTag = async (request: Request, response: Response, n
 
   response.sendStatus(200);
 }
+
+export const setViewSpecType = async (request: Request, response: Response, next: any) => {
+
+  console.log('setViewSpecType');
+
+  // const { tagId, iconFileName } = request.body;
+
+  // console.log(tagId, iconFileName);
+
+  // await assignTagIconToDbTag(tagId, iconFileName);
+
+  response.sendStatus(200);
+}
+
+export const setStartDate = async (request: Request, response: Response, next: any) => {
+
+  console.log('setStartDate');
+
+  // const { tagId, iconFileName } = request.body;
+
+  // console.log(tagId, iconFileName);
+
+  // await assignTagIconToDbTag(tagId, iconFileName);
+
+  response.sendStatus(200);
+}
+
+export const setEndDate = async (request: Request, response: Response, next: any) => {
+
+  console.log('setEndDate');
+
+  // const { tagId, iconFileName } = request.body;
+
+  // console.log(tagId, iconFileName);
+
+  // await assignTagIconToDbTag(tagId, iconFileName);
+
+  response.sendStatus(200);
+}
