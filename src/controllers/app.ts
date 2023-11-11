@@ -14,7 +14,7 @@ import {
   addTagToDbMediaItems,
   getMediaItemsToDisplayFromDb,
 } from './dbInterface';
-import { MediaItem, Tag, ViewSpecType } from '../types';
+import { MediaItem, Tag } from '../types';
 import multer from 'multer';
 
 export const getVersion = (request: Request, response: Response, next: any) => {

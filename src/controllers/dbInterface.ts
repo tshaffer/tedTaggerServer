@@ -39,14 +39,13 @@ export const getMediaItemsToDisplayFromDb = async (
       break;
     }
     case ViewSpecType.ByDateRange.toString(): {
-      querySpec = { creationTime: { $gte: '2001-07-01T22:03:02Z', $lt: '2001-09-01T22:03:02Z' } };
+      querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
       break;
     }
   }
 
   const mediaItemModel = getMediaitemModel();
 
-  // db.mediaitems.find({ creationTime: { $gte: '2001-07-01T22:03:02Z', $lt: '2001-09-01T22:03:02Z' } } )
   const query = mediaItemModel.find(querySpec);
   const documents: any = await query.exec();
   const mediaItems: MediaItem[] = [];
