@@ -12,8 +12,9 @@ import {
   addTagToDbMediaItem,
   assignTagIconToDbTag,
   addTagToDbMediaItems,
+  getMediaItemsToDisplayFromDb,
 } from './dbInterface';
-import { MediaItem, Tag } from '../types';
+import { MediaItem, Tag, ViewSpecType } from '../types';
 import multer from 'multer';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
@@ -27,6 +28,14 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 export const getMediaItems = async (request: Request, response: Response, next: any) => {
   console.log('getMediaItems');
   const mediaItems: MediaItem[] = await getAllMediaItemsFromDb();
+  response.json(mediaItems);
+};
+
+export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
+  const viewSpec = request.query.viewSpec as string;
+  const startDate = request.query.startDate as string;
+  const endDate = request.query.endDate as string;
+  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(viewSpec, startDate, endDate);
   response.json(mediaItems);
 };
 

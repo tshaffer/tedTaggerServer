@@ -6,6 +6,7 @@ import {
 import {
   MediaItem,
   Tag,
+  ViewSpecType,
 } from "../types";
 import { Document } from 'mongoose';
 
@@ -16,6 +17,39 @@ export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
   const mediaItems: MediaItem[] = [];
   // const documents: any = await (mediaItemModel as any).find().limit(100).exec();
   const documents: any = await (mediaItemModel as any).find().exec();
+  for (const document of documents) {
+    const mediaItem: MediaItem = document.toObject() as MediaItem;
+    mediaItem.googleId = document.googleId.toString();
+    mediaItems.push(mediaItem);
+  }
+  return mediaItems;
+}
+
+export const getMediaItemsToDisplayFromDb = async (
+  viewSpec: string,
+  startDate: string,
+  endDate: string,
+): Promise<MediaItem[]> => {
+
+  let querySpec = {};
+
+  switch (viewSpec) {
+    case ViewSpecType.All.toString():
+    default: {
+      break;
+    }
+    case ViewSpecType.ByDateRange.toString(): {
+      querySpec = { creationTime: { $gte: '2001-07-01T22:03:02Z', $lt: '2001-09-01T22:03:02Z' } };
+      break;
+    }
+  }
+
+  const mediaItemModel = getMediaitemModel();
+
+  // db.mediaitems.find({ creationTime: { $gte: '2001-07-01T22:03:02Z', $lt: '2001-09-01T22:03:02Z' } } )
+  const query = mediaItemModel.find(querySpec);
+  const documents: any = await query.exec();
+  const mediaItems: MediaItem[] = [];
   for (const document of documents) {
     const mediaItem: MediaItem = document.toObject() as MediaItem;
     mediaItem.googleId = document.googleId.toString();
@@ -78,9 +112,9 @@ export const addTagToDbMediaItems = async (mediaItemIds: string[], tagId: string
     promises.push(addTagToDbMediaItem(mediaItemId, tagId));
   });
   return Promise.all(promises)
-  .then(() => {
-    return Promise.resolve();
-  })
+    .then(() => {
+      return Promise.resolve();
+    })
 }
 
 export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {

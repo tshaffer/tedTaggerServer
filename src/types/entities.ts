@@ -8,7 +8,7 @@ export interface GeoData {
 
 export interface MediaItem {
   googleId: string,
-  fileName:  string,
+  fileName: string,
   albumId: string;
   filePath?: string,
   productUrl?: string,
@@ -30,3 +30,9 @@ export interface Tag {
   type: string,
   iconFileName?: string;
 }
+
+export enum ViewSpecType {
+  All,
+  ByDateRange,
+}
+
