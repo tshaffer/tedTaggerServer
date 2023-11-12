@@ -13,6 +13,9 @@ import {
   assignTagIconToDbTag,
   addTagToDbMediaItems,
   getMediaItemsToDisplayFromDb,
+  setViewSpecTypeDb,
+  setStartDateDb,
+  setEndDateDb,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
 import multer from 'multer';
@@ -127,40 +130,22 @@ export const assignTagIconToTag = async (request: Request, response: Response, n
 }
 
 export const setViewSpecType = async (request: Request, response: Response, next: any) => {
-
   console.log('setViewSpecType');
-
-  // const { tagId, iconFileName } = request.body;
-
-  // console.log(tagId, iconFileName);
-
-  // await assignTagIconToDbTag(tagId, iconFileName);
-
+  const { viewSpecType } = request.body;
+  setViewSpecTypeDb(viewSpecType);
   response.sendStatus(200);
 }
 
 export const setStartDate = async (request: Request, response: Response, next: any) => {
-
   console.log('setStartDate');
-
-  // const { tagId, iconFileName } = request.body;
-
-  // console.log(tagId, iconFileName);
-
-  // await assignTagIconToDbTag(tagId, iconFileName);
-
+  const { startDate } = request.body;
+  setStartDateDb(startDate);
   response.sendStatus(200);
 }
 
 export const setEndDate = async (request: Request, response: Response, next: any) => {
-
   console.log('setEndDate');
-
-  // const { tagId, iconFileName } = request.body;
-
-  // console.log(tagId, iconFileName);
-
-  // await assignTagIconToDbTag(tagId, iconFileName);
-
+  const { endDate } = request.body;
+  setEndDateDb(endDate);
   response.sendStatus(200);
 }

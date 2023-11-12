@@ -6,9 +6,11 @@ import {
 import {
   MediaItem,
   Tag,
+  ViewSpecDb,
   ViewSpecType,
 } from "../types";
 import { Document } from 'mongoose';
+import { getViewSpecModel } from "../models/ViewSpec";
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -129,3 +131,111 @@ export const assignTagIconToDbTag = async (tagId: string, iconFileName: string):
     tagDocument.save();
   }
 }
+
+const createViewSpecDocument = async (viewSpec: ViewSpecDb): Promise<Document | void> => {
+  const viewSpecModel = getViewSpecModel();
+  return viewSpecModel.create(viewSpec)
+    .then((viewSpecDocument: any) => {
+      console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
+      console.log(viewSpecDocument);
+      return Promise.resolve(viewSpecDocument);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}
+
+export const setViewSpecTypeDb = async (viewSpecType: string): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  return viewSpecModel.find({}
+    , (err: any, viewSpecDocs: any) => {
+      if (err) {
+        console.log(err);
+      } else
+        if (isArray(viewSpecDocs)) {
+          if (viewSpecDocs.length === 0) {
+            createViewSpecDocument({
+              type: viewSpecType,
+              startDate: new Date().toISOString(),
+              endDate: new Date().toISOString(),
+            })
+              .then((viewSpecDocument: any) => {
+                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
+                console.log(viewSpecDocument);
+                return Promise.resolve(viewSpecDocument);
+              });
+          } if (viewSpecDocs.length === 1) {
+            const viewSpecDoc: any = viewSpecDocs[0];
+            viewSpecDoc.viewSpecType = viewSpecType;
+            viewSpecDoc.save();
+            return Promise.resolve();
+          }
+        } else {
+          console.log('viewSpecDocs is not an array');
+          return Promise.reject('viewSpecDocs is not an array');
+        }
+    });
+}
+
+export const setStartDateDb = async (startDate: string): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  return viewSpecModel.find({}
+    , (err: any, viewSpecDocs: any) => {
+      if (err) {
+        console.log(err);
+      } else
+        if (isArray(viewSpecDocs)) {
+          if (viewSpecDocs.length === 0) {
+            createViewSpecDocument({
+              type: ViewSpecType.All.toString(),
+              startDate,
+              endDate: new Date().toISOString(),
+            })
+              .then((viewSpecDocument: any) => {
+                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
+                console.log(viewSpecDocument);
+                return Promise.resolve(viewSpecDocument);
+              });
+          } if (viewSpecDocs.length === 1) {
+            const viewSpecDoc: any = viewSpecDocs[0];
+            viewSpecDoc.startDate = startDate;
+            viewSpecDoc.save();
+            return Promise.resolve();
+          }
+        } else {
+          console.log('viewSpecDocs is not an array');
+          return Promise.reject('viewSpecDocs is not an array');
+        }
+    });
+}
+
+export const setEndDateDb = async (endDate: string): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  return viewSpecModel.find({}
+    , (err: any, viewSpecDocs: any) => {
+      if (err) {
+        console.log(err);
+      } else
+        if (isArray(viewSpecDocs)) {
+          if (viewSpecDocs.length === 0) {
+            createViewSpecDocument({
+              type: ViewSpecType.All.toString(),
+              startDate: new Date().toISOString(),
+              endDate,
+            })
+              .then((viewSpecDocument: any) => {
+                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
+                console.log(viewSpecDocument);
+                return Promise.resolve(viewSpecDocument);
+              });
+          } if (viewSpecDocs.length === 1) {
+            const viewSpecDoc: any = viewSpecDocs[0];
+            viewSpecDoc.endDate = endDate;
+            viewSpecDoc.save();
+            return Promise.resolve();
+          }
+        } else {
+          console.log('viewSpecDocs is not an array');
+          return Promise.reject('viewSpecDocs is not an array');
+        }
+    });
+} 

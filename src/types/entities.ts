@@ -36,3 +36,15 @@ export enum ViewSpecType {
   ByDateRange,
 }
 
+export interface ViewSpec {
+  viewSpecType: ViewSpecType;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ViewSpecDb {
+  type: string;
+  startDate: string;
+  endDate: string;
+
+}
