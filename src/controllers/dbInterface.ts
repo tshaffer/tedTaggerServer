@@ -6,6 +6,7 @@ import {
 import {
   MediaItem,
   Tag,
+  ViewSpec,
   ViewSpecDb,
   ViewSpecType,
 } from "../types";
@@ -239,3 +240,41 @@ export const setEndDateDb = async (endDate: string): Promise<any> => {
         }
     });
 } 
+
+export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
+  
+  const viewSpecModel = getViewSpecModel();
+
+  let viewSpec: ViewSpec = {
+    viewSpecType: ViewSpecType.All,
+    startDate: new Date().toISOString(),
+    endDate: new Date().toISOString(),
+  };
+  
+  const documents: any = await (viewSpecModel as any).find().exec();
+
+  for (const document of documents) {
+    const viewSpecDb: ViewSpecDb = document.toObject() as ViewSpecDb;
+    // console.log('getViewSpecFromDb: viewSpec', viewSpec);
+
+    let viewSpecType: ViewSpecType = ViewSpecType.All;
+    const viewSpecTypeDb = viewSpecDb.type;
+    switch (viewSpecTypeDb) {
+      case ViewSpecType.All.toString():
+        default: {
+          break;
+        }
+      case ViewSpecType.ByDateRange.toString(): {
+        viewSpecType = ViewSpecType.ByDateRange;
+        break;
+      } 
+    }
+    viewSpec = {
+      viewSpecType,
+      startDate: viewSpecDb.startDate,
+      endDate: viewSpecDb.endDate,
+    }
+  }
+
+  return viewSpec;
+}

@@ -16,6 +16,7 @@ import {
   setViewSpecTypeDb,
   setStartDateDb,
   setEndDateDb,
+  getViewSpecFromDb,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
 import multer from 'multer';
@@ -149,3 +150,9 @@ export const setEndDate = async (request: Request, response: Response, next: any
   setEndDateDb(endDate);
   response.sendStatus(200);
 }
+
+export const getViewSpec = async (request: Request, response: Response, next: any) => {
+  const viewSpec = await getViewSpecFromDb();
+  response.json(viewSpec);
+};
+

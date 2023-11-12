@@ -21,6 +21,7 @@ import {
   setEndDate,
   setStartDate,
   getMediaItemsToDisplay,
+  getViewSpec,
 } from './controllers';
 
 class App {
@@ -60,6 +61,7 @@ class App {
     this.app.get('/api/v1/mediaItems', getMediaItems);
     this.app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     this.app.get('/api/v1/tags', getTags);
+    this.app.get('/api/v1/viewSpec', getViewSpec);
 
     this.app.post('/api/v1/addTag', addTag)
     this.app.post('/api/v1/addTagToMediaItem', addTagToMediaItem)
