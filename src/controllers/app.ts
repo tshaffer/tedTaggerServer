@@ -40,15 +40,11 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
 };
 
 export const getTags = async (request: Request, response: Response, next: any) => {
-  console.log('getTags');
   const tags: Tag[] = await getAllTagsFromDb();
   response.json(tags);
 };
 
 export const addTag = async (request: Request, response: Response, next: any) => {
-
-  console.log('addTag');
-  console.log(request.body);
 
   const { id, label, type } = request.body;
 
@@ -64,9 +60,6 @@ export const addTag = async (request: Request, response: Response, next: any) =>
 
 export const addTagToMediaItem = async (request: Request, response: Response, next: any) => {
 
-  console.log('addTagToMediaItem');
-  console.log(request.body);
-
   const { mediaItemId, tagId } = request.body;
 
   await addTagToDbMediaItem(mediaItemId, tagId);
@@ -75,9 +68,6 @@ export const addTagToMediaItem = async (request: Request, response: Response, ne
 }
 
 export const addTagToMediaItems = async (request: Request, response: Response, next: any) => {
-
-  console.log('addTagToMediaItems');
-  console.log(request.body);
 
   const { mediaItemIds, tagId } = request.body;
 
@@ -103,18 +93,12 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
     } else if (err) {
       return response.status(500).json(err);
     }
-    console.log('return from upload: ', request.file);
 
     const inputFilePath: string = request.file!.path; // 'public/tagIconImages/morgan.png'
-    console.log(path.basename(inputFilePath)); // morgan.png
-    console.log(path.dirname(inputFilePath));  // public/tagIconImages
-    console.log(path.extname(inputFilePath));  // .png
-    console.log(path.parse(inputFilePath));  // base, dir, ext as above. name: 'morgan'
     const iconFileName = path.parse(inputFilePath).name + '.jpg';
     const outputFilePath: string = path.join(
       path.dirname(inputFilePath),
       iconFileName);
-    console.log(outputFilePath);
     resizeIconFile(inputFilePath, outputFilePath);
 
     const responseData = {
@@ -137,15 +121,8 @@ const resizeIconFile = async (inputFilePath: string, outputFilePath: string) => 
 };
 
 export const assignTagIconToTag = async (request: Request, response: Response, next: any) => {
-
-  console.log('assignTagIconToTag');
-
   const { tagId, iconFileName } = request.body;
-
-  console.log(tagId, iconFileName);
-
   await assignTagIconToDbTag(tagId, iconFileName);
-
   response.sendStatus(200);
 }
 
