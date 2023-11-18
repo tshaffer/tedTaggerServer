@@ -81,8 +81,6 @@ export const createTagDocument = async (tag: Tag): Promise<Document | void> => {
 
   return tagModel.create(tag)
     .then((tagDocument: any) => {
-      console.log('createTagDocument: value returned from tagModel.create:');
-      console.log(tagDocument);
       return Promise.resolve(tagDocument);
     }).catch((err: any) => {
       if (err.name === 'MongoError' && err.code === 11000) {
@@ -137,15 +135,19 @@ const createViewSpecDocument = async (viewSpec: ViewSpecDb): Promise<Document | 
   const viewSpecModel = getViewSpecModel();
   return viewSpecModel.create(viewSpec)
     .then((viewSpecDocument: any) => {
-      console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
-      console.log(viewSpecDocument);
       return Promise.resolve(viewSpecDocument);
     }).catch((err: any) => {
       return Promise.reject(err);
     });
 }
 
-export const setViewSpecTypeDb = async (viewSpecType: string): Promise<any> => {
+const updateViewSpecType= async (viewSpecType: number): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  const update: any = { type: viewSpecType };
+  const doc = await  viewSpecModel.findOneAndUpdate({}, update, { new: true });
+}
+
+export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
   const viewSpecModel = getViewSpecModel();
   return viewSpecModel.find({}
     , (err: any, viewSpecDocs: any) => {
@@ -160,14 +162,10 @@ export const setViewSpecTypeDb = async (viewSpecType: string): Promise<any> => {
               endDate: new Date().toISOString(),
             })
               .then((viewSpecDocument: any) => {
-                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
-                console.log(viewSpecDocument);
                 return Promise.resolve(viewSpecDocument);
               });
           } if (viewSpecDocs.length === 1) {
-            const viewSpecDoc: any = viewSpecDocs[0];
-            viewSpecDoc.viewSpecType = viewSpecType;
-            viewSpecDoc.save();
+            updateViewSpecType(viewSpecType);
             return Promise.resolve();
           }
         } else {
@@ -187,13 +185,11 @@ export const setStartDateDb = async (startDate: string): Promise<any> => {
         if (isArray(viewSpecDocs)) {
           if (viewSpecDocs.length === 0) {
             createViewSpecDocument({
-              type: ViewSpecType.All.toString(),
+              type: ViewSpecType.All,
               startDate,
               endDate: new Date().toISOString(),
             })
               .then((viewSpecDocument: any) => {
-                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
-                console.log(viewSpecDocument);
                 return Promise.resolve(viewSpecDocument);
               });
           } if (viewSpecDocs.length === 1) {
@@ -219,13 +215,11 @@ export const setEndDateDb = async (endDate: string): Promise<any> => {
         if (isArray(viewSpecDocs)) {
           if (viewSpecDocs.length === 0) {
             createViewSpecDocument({
-              type: ViewSpecType.All.toString(),
+              type: ViewSpecType.All,
               startDate: new Date().toISOString(),
               endDate,
             })
               .then((viewSpecDocument: any) => {
-                console.log('createViewSpecDocument: value returned from viewSpecModel.create:');
-                console.log(viewSpecDocument);
                 return Promise.resolve(viewSpecDocument);
               });
           } if (viewSpecDocs.length === 1) {
@@ -255,16 +249,14 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
 
   for (const document of documents) {
     const viewSpecDb: ViewSpecDb = document.toObject() as ViewSpecDb;
-    // console.log('getViewSpecFromDb: viewSpec', viewSpec);
-
     let viewSpecType: ViewSpecType = ViewSpecType.All;
     const viewSpecTypeDb = viewSpecDb.type;
     switch (viewSpecTypeDb) {
-      case ViewSpecType.All.toString():
+      case ViewSpecType.All:
         default: {
           break;
         }
-      case ViewSpecType.ByDateRange.toString(): {
+      case ViewSpecType.ByDateRange: {
         viewSpecType = ViewSpecType.ByDateRange;
         break;
       } 

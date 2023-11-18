@@ -43,7 +43,7 @@ export interface ViewSpec {
 }
 
 export interface ViewSpecDb {
-  type: string;
+  type: number;
   startDate: string;
   endDate: string;
 
