@@ -10,7 +10,7 @@ import { Routes } from './routes/routes';
 
 import {
   addTag,
-  getMediaItems,
+  getMediaItemsToDisplay,
   getTags,
   getVersion,
   addTagToMediaItem,
@@ -20,7 +20,6 @@ import {
   setViewSpecType,
   setEndDate,
   setStartDate,
-  getMediaItemsToDisplay,
   getViewSpec,
 } from './controllers';
 
@@ -58,7 +57,6 @@ class App {
 
     // app routes
     this.app.get('/api/v1/version', getVersion);
-    this.app.get('/api/v1/mediaItems', getMediaItems);
     this.app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     this.app.get('/api/v1/tags', getTags);
     this.app.get('/api/v1/viewSpec', getViewSpec);
