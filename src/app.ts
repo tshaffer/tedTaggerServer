@@ -53,22 +53,6 @@ class App {
     this.app.use(bodyParser.urlencoded({ extended: true }));
 
     this.route.routes(this.app);
-
-    // app routes
-    this.app.get('/api/v1/version', getVersion);
-    this.app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
-    this.app.get('/api/v1/tags', getTags);
-    this.app.get('/api/v1/viewSpec', getViewSpec);
-
-    this.app.post('/api/v1/addTag', addTag)
-    this.app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
-    this.app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
-    this.app.post('/api/v1/assignTagIconToTag', assignTagIconToTag);
-
-    this.app.post('/api/v1/setViewSpecType', setViewSpecType);
-    this.app.post('/api/v1/setStartDate', setStartDate);
-    this.app.post('/api/v1/setEndDate', setEndDate);
-
   }
 
   private config(): void {
