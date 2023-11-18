@@ -13,7 +13,6 @@ import {
   getMediaItemsToDisplay,
   getTags,
   getVersion,
-  addTagToMediaItem,
   addTagToMediaItems,
   uploadTagIconFile,
   assignTagIconToTag,
@@ -62,7 +61,6 @@ class App {
     this.app.get('/api/v1/viewSpec', getViewSpec);
 
     this.app.post('/api/v1/addTag', addTag)
-    this.app.post('/api/v1/addTagToMediaItem', addTagToMediaItem)
     this.app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     this.app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
     this.app.post('/api/v1/assignTagIconToTag', assignTagIconToTag);

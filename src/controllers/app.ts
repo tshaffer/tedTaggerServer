@@ -56,15 +56,6 @@ export const addTag = async (request: Request, response: Response, next: any) =>
   response.sendStatus(200);
 }
 
-export const addTagToMediaItem = async (request: Request, response: Response, next: any) => {
-
-  const { mediaItemId, tagId } = request.body;
-
-  await addTagToDbMediaItem(mediaItemId, tagId);
-
-  response.sendStatus(200);
-}
-
 export const addTagToMediaItems = async (request: Request, response: Response, next: any) => {
 
   const { mediaItemIds, tagId } = request.body;
