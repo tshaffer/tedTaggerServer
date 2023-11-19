@@ -117,6 +117,31 @@ export const addTagToDbMediaItems = async (mediaItemIds: string[], tagId: string
     })
 }
 
+export const deleteTagFromDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
+
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItemId };
+
+  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
+  mediaItemDocument.get('tagIds').pull(tagId);
+  mediaItemDocument.markModified('tagIds');
+  return await mediaItemDocument.save();
+}
+
+export const deleteTagFromDbMediaItems = async (mediaItemIds: string[], tagId: string): Promise<any> => {
+
+  // better db interface to do the this??
+
+  const promises: Promise<any>[] = [];
+  mediaItemIds.forEach((mediaItemId: string) => {
+    promises.push(deleteTagFromDbMediaItem(mediaItemId, tagId));
+  });
+  return Promise.all(promises)
+    .then(() => {
+      return Promise.resolve();
+    })
+}
+
 export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
 
   console.log(tagId, iconFileName);

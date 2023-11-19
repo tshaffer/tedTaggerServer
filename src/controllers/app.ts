@@ -17,6 +17,7 @@ import {
   setStartDateDb,
   setEndDateDb,
   getViewSpecFromDb,
+  deleteTagFromDbMediaItems,
 } from './dbInterface';
 import { MediaItem, Tag } from '../types';
 import multer from 'multer';
@@ -61,6 +62,16 @@ export const addTagToMediaItems = async (request: Request, response: Response, n
   const { mediaItemIds, tagId } = request.body;
 
   await addTagToDbMediaItems(mediaItemIds, tagId);
+
+  response.sendStatus(200);
+}
+
+
+export const deleteTagFromMediaItems = async (request: Request, response: Response, next: any) => {
+
+  const { tagId, mediaItemIds } = request.body;
+
+  await deleteTagFromDbMediaItems(mediaItemIds, tagId);
 
   response.sendStatus(200);
 }

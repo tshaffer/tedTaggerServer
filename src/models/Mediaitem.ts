@@ -28,6 +28,7 @@ const MediaitemSchema = new Schema(
     people: [{                                                    // takeout metadata: people
       name: String, default: ''
     }],
+    tagIds: [String],
   }
 );
 
