@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const ViewSpecSchema = new Schema(
   {
     type: { type: Number, required: true, unique: true },
-    tagSpec: { type: String },
+    tagSpec: { type: String, required: true, unique: true },
     startDate: { type: String, required: true, unique: true },
     endDate: { type: String, required: true, unique: true },
   }

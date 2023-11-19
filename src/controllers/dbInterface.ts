@@ -31,6 +31,7 @@ export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
 export const getMediaItemsToDisplayFromDb = async (
   viewSpec: string,
+  tagSpec: string,
   startDate: string,
   endDate: string,
 ): Promise<MediaItem[]> => {
@@ -46,6 +47,10 @@ export const getMediaItemsToDisplayFromDb = async (
       querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
       break;
     }
+  }
+
+  if (tagSpec === 'untagged') {
+    querySpec = { ...querySpec, tagIds: { $size: 0 } };
   }
 
   const mediaItemModel = getMediaitemModel();

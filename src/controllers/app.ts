@@ -31,9 +31,10 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
   const viewSpec = request.query.viewSpec as string;
+  const tagSpec = request.query.tagSpec as string;
   const startDate = request.query.startDate as string;
   const endDate = request.query.endDate as string;
-  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(viewSpec, startDate, endDate);
+  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(viewSpec, tagSpec, startDate, endDate);
   response.json(mediaItems);
 };
 
