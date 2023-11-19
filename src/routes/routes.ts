@@ -17,6 +17,7 @@ import {
   setViewSpecType,
   uploadTagIconFile,
   deleteTagFromMediaItems,
+  setViewSpecTagSpec,
  } from '../controllers';
 
 export class Routes {
@@ -46,6 +47,7 @@ export class Routes {
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
 
     app.post('/api/v1/setViewSpecType', setViewSpecType);
+    app.post('/api/v1/setViewSpecTagSpec', setViewSpecTagSpec);
     app.post('/api/v1/setStartDate', setStartDate);
     app.post('/api/v1/setEndDate', setEndDate);
 

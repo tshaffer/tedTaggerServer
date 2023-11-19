@@ -36,14 +36,21 @@ export enum ViewSpecType {
   ByDateRange,
 }
 
+export enum ViewSpecTagType {
+  Any = 'any',
+  Untagged = 'untagged',
+}
+
 export interface ViewSpec {
   viewSpecType: ViewSpecType;
+  tagSpec: ViewSpecTagType;
   startDate: string;
   endDate: string;
 }
 
 export interface ViewSpecDb {
   type: number;
+  tagSpec: string;
   startDate: string;
   endDate: string;
 

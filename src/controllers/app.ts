@@ -7,13 +7,12 @@ const sharp = require('sharp');
 import { version } from '../version';
 import {
   createTagDocument,
-  getAllMediaItemsFromDb,
   getAllTagsFromDb,
-  addTagToDbMediaItem,
   assignTagIconToDbTag,
   addTagToDbMediaItems,
   getMediaItemsToDisplayFromDb,
   setViewSpecTypeDb,
+  setViewSpecTagSpecDb,
   setStartDateDb,
   setEndDateDb,
   getViewSpecFromDb,
@@ -130,6 +129,15 @@ export const setViewSpecType = async (request: Request, response: Response, next
   console.log('setViewSpecType');
   const { viewSpecType } = request.body;
   setViewSpecTypeDb(viewSpecType);
+  response.sendStatus(200);
+}
+
+export const setViewSpecTagSpec = async (request: Request, response: Response, next: any) => {
+  console.log('setViewSpecTagSpec');
+  const { viewSpecTagSpec } = request.body;
+  setViewSpecTagSpecDb(viewSpecTagSpec);
+  console.log('setViewSpecTagSpec');
+  console.log(viewSpecTagSpec);
   response.sendStatus(200);
 }
 

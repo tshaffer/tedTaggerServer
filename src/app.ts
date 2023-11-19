@@ -8,20 +8,6 @@ const bodyParser = require('body-parser');
 
 import { Routes } from './routes/routes';
 
-import {
-  addTag,
-  getMediaItemsToDisplay,
-  getTags,
-  getVersion,
-  addTagToMediaItems,
-  uploadTagIconFile,
-  assignTagIconToTag,
-  setViewSpecType,
-  setEndDate,
-  setStartDate,
-  getViewSpec,
-} from './controllers';
-
 class App {
 
   public app: express.Application;

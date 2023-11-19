@@ -8,6 +8,7 @@ import {
   Tag,
   ViewSpec,
   ViewSpecDb,
+  ViewSpecTagType,
   ViewSpecType,
 } from "../types";
 import { Document } from 'mongoose';
@@ -183,6 +184,7 @@ export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
           if (viewSpecDocs.length === 0) {
             createViewSpecDocument({
               type: viewSpecType,
+              tagSpec: ViewSpecTagType.Any,
               startDate: new Date().toISOString(),
               endDate: new Date().toISOString(),
             })
@@ -191,6 +193,41 @@ export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
               });
           } if (viewSpecDocs.length === 1) {
             updateViewSpecType(viewSpecType);
+            return Promise.resolve();
+          }
+        } else {
+          console.log('viewSpecDocs is not an array');
+          return Promise.reject('viewSpecDocs is not an array');
+        }
+    });
+}
+
+const updateViewSpecTagSpec= async (viewSpecTagSpec: string): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  const update: any = { tagSpec: viewSpecTagSpec };
+  const doc = await viewSpecModel.findOneAndUpdate({}, update, { new: true });
+}
+
+export const setViewSpecTagSpecDb = async (viewSpecTagSpec: string): Promise<any> => {
+  const viewSpecModel = getViewSpecModel();
+  return viewSpecModel.find({}
+    , (err: any, viewSpecDocs: any) => {
+      if (err) {
+        console.log(err);
+      } else
+        if (isArray(viewSpecDocs)) {
+          if (viewSpecDocs.length === 0) {
+            createViewSpecDocument({
+              type: ViewSpecType.All,
+              tagSpec: viewSpecTagSpec,
+              startDate: new Date().toISOString(),
+              endDate: new Date().toISOString(),
+            })
+              .then((viewSpecDocument: any) => {
+                return Promise.resolve(viewSpecDocument);
+              });
+          } if (viewSpecDocs.length === 1) {
+            updateViewSpecTagSpec(viewSpecTagSpec);
             return Promise.resolve();
           }
         } else {
@@ -211,6 +248,7 @@ export const setStartDateDb = async (startDate: string): Promise<any> => {
           if (viewSpecDocs.length === 0) {
             createViewSpecDocument({
               type: ViewSpecType.All,
+              tagSpec: ViewSpecTagType.Any,
               startDate,
               endDate: new Date().toISOString(),
             })
@@ -241,6 +279,7 @@ export const setEndDateDb = async (endDate: string): Promise<any> => {
           if (viewSpecDocs.length === 0) {
             createViewSpecDocument({
               type: ViewSpecType.All,
+              tagSpec: ViewSpecTagType.Any,
               startDate: new Date().toISOString(),
               endDate,
             })
@@ -266,6 +305,7 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
 
   let viewSpec: ViewSpec = {
     viewSpecType: ViewSpecType.All,
+    tagSpec: ViewSpecTagType.Any,
     startDate: new Date().toISOString(),
     endDate: new Date().toISOString(),
   };
@@ -288,6 +328,7 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
     }
     viewSpec = {
       viewSpecType,
+      tagSpec: viewSpecDb.tagSpec === ViewSpecTagType.Any ? ViewSpecTagType.Any : ViewSpecTagType.Untagged,
       startDate: viewSpecDb.startDate,
       endDate: viewSpecDb.endDate,
     }
