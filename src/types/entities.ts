@@ -53,5 +53,11 @@ export interface ViewSpecDb {
   tagSpec: string;
   startDate: string;
   endDate: string;
+}
 
+export interface AppTagAvatar {
+  id: string;
+  label: string;
+  pathToLarge: string;
+  path: string;
 }

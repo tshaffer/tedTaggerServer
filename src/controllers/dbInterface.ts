@@ -1,9 +1,11 @@
 import { isArray, isNil } from "lodash";
 import {
+  getAppTagAvatarModel,
   getMediaitemModel,
   getTagModel,
 } from "../models";
 import {
+  AppTagAvatar,
   MediaItem,
   Tag,
   ViewSpec,
@@ -148,20 +150,6 @@ export const deleteTagFromDbMediaItems = async (mediaItemIds: string[], tagId: s
     })
 }
 
-export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
-
-  console.log(tagId, iconFileName);
-
-  const tagModel = getTagModel();
-
-  const filter = { id: tagId };
-  const tagDocument: Document = await tagModel.findOne(filter);
-  if (!isNil(tagDocument)) {
-    tagDocument.set('iconFileName', iconFileName);
-    tagDocument.save();
-  }
-}
-
 const createViewSpecDocument = async (viewSpec: ViewSpecDb): Promise<Document | void> => {
   const viewSpecModel = getViewSpecModel();
   return viewSpecModel.create(viewSpec)
@@ -172,10 +160,10 @@ const createViewSpecDocument = async (viewSpec: ViewSpecDb): Promise<Document | 
     });
 }
 
-const updateViewSpecType= async (viewSpecType: number): Promise<any> => {
+const updateViewSpecType = async (viewSpecType: number): Promise<any> => {
   const viewSpecModel = getViewSpecModel();
   const update: any = { type: viewSpecType };
-  const doc = await  viewSpecModel.findOneAndUpdate({}, update, { new: true });
+  const doc = await viewSpecModel.findOneAndUpdate({}, update, { new: true });
 }
 
 export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
@@ -207,7 +195,7 @@ export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
     });
 }
 
-const updateViewSpecTagSpec= async (viewSpecTagSpec: string): Promise<any> => {
+const updateViewSpecTagSpec = async (viewSpecTagSpec: string): Promise<any> => {
   const viewSpecModel = getViewSpecModel();
   const update: any = { tagSpec: viewSpecTagSpec };
   const doc = await viewSpecModel.findOneAndUpdate({}, update, { new: true });
@@ -302,10 +290,10 @@ export const setEndDateDb = async (endDate: string): Promise<any> => {
           return Promise.reject('viewSpecDocs is not an array');
         }
     });
-} 
+}
 
 export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
-  
+
   const viewSpecModel = getViewSpecModel();
 
   let viewSpec: ViewSpec = {
@@ -314,7 +302,7 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
     startDate: new Date().toISOString(),
     endDate: new Date().toISOString(),
   };
-  
+
   const documents: any = await (viewSpecModel as any).find().exec();
 
   for (const document of documents) {
@@ -323,13 +311,13 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
     const viewSpecTypeDb = viewSpecDb.type;
     switch (viewSpecTypeDb) {
       case ViewSpecType.All:
-        default: {
-          break;
-        }
+      default: {
+        break;
+      }
       case ViewSpecType.ByDateRange: {
         viewSpecType = ViewSpecType.ByDateRange;
         break;
-      } 
+      }
     }
     viewSpec = {
       viewSpecType,
@@ -341,3 +329,29 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
 
   return viewSpec;
 }
+
+export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
+
+  console.log(tagId, iconFileName);
+
+  const tagModel = getTagModel();
+
+  const filter = { id: tagId };
+  const tagDocument: Document = await tagModel.findOne(filter);
+  if (!isNil(tagDocument)) {
+    tagDocument.set('iconFileName', iconFileName);
+    tagDocument.save();
+  }
+}
+
+export const createAppTagAvatarDocument = async (appTagAvatar: AppTagAvatar): Promise<Document | void> => {
+  const appTagAvatarModel = getAppTagAvatarModel();
+  return appTagAvatarModel.create(appTagAvatar)
+    .then((appTagAvatarDocument: any) => {
+      return Promise.resolve(appTagAvatarDocument);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}
+
+

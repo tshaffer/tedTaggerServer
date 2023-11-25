@@ -19,6 +19,7 @@ import {
   deleteTagFromMediaItems,
   setViewSpecTagSpec,
  } from '../controllers';
+import { addAppAvatars } from '../utilities/utilities';
 
 export class Routes {
 
@@ -36,6 +37,7 @@ export class Routes {
     app.get('/images/test.jpg', getImage);
 
     app.get('/api/v1/version', getVersion);
+    app.get('/api/v1/addAppAvatars', addAppAvatars)
     app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     app.get('/api/v1/tags', getTags);
     app.get('/api/v1/viewSpec', getViewSpec);
