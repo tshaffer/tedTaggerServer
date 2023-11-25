@@ -1,5 +1,5 @@
 import express from 'express';
-import { 
+import {
   getIndex,
   getCSS,
   getBundle,
@@ -11,7 +11,7 @@ import {
   getViewSpec,
   addTag,
   addTagToMediaItems,
-  assignTagIconToTag,
+  assignTagAvatarToTag,
   setEndDate,
   setStartDate,
   setViewSpecType,
@@ -19,7 +19,7 @@ import {
   deleteTagFromMediaItems,
   setViewSpecTagSpec,
   getAppTagAvatars,
- } from '../controllers';
+} from '../controllers';
 import { addAppAvatars } from '../utilities/utilities';
 
 export class Routes {
@@ -47,7 +47,7 @@ export class Routes {
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
-    app.post('/api/v1/assignTagIconToTag', assignTagIconToTag);
+    app.post('/api/v1/assignTagAvatarToTag', assignTagAvatarToTag);
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
 
     app.post('/api/v1/setViewSpecType', setViewSpecType);

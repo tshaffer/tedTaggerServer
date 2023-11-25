@@ -27,8 +27,9 @@ export interface MediaItem {
 export interface Tag {
   id: string;
   label: string;
-  type: string,
-  iconFileName?: string;
+  type: string;
+  avatarType: string;
+  avatarId: string;
 }
 
 export enum ViewSpecType {

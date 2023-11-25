@@ -330,16 +330,17 @@ export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
   return viewSpec;
 }
 
-export const assignTagIconToDbTag = async (tagId: string, iconFileName: string): Promise<any> => {
+export const assignTagAvatarToDbTag = async (tagId: string, avatarType: string, avatarId: string): Promise<any> => {
 
-  console.log(tagId, iconFileName);
+  console.log(tagId, avatarType, avatarId);
 
   const tagModel = getTagModel();
 
   const filter = { id: tagId };
   const tagDocument: Document = await tagModel.findOne(filter);
   if (!isNil(tagDocument)) {
-    tagDocument.set('iconFileName', iconFileName);
+    tagDocument.set('avatarType', avatarType);
+    tagDocument.set('avatarId', avatarId);
     tagDocument.save();
   }
 }

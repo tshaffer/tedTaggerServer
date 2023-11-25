@@ -8,7 +8,7 @@ import { version } from '../version';
 import {
   createTagDocument,
   getAllTagsFromDb,
-  assignTagIconToDbTag,
+  assignTagAvatarToDbTag,
   addTagToDbMediaItems,
   getMediaItemsToDisplayFromDb,
   setViewSpecTypeDb,
@@ -46,12 +46,15 @@ export const getTags = async (request: Request, response: Response, next: any) =
 
 export const addTag = async (request: Request, response: Response, next: any) => {
 
-  const { id, label, type } = request.body;
+  const { id, label, type, avatarType, avatarId } = request.body;
 
+  let resolvedAvatarId = avatarId === '' ? '430b3cf0-33e7-4e72-a85b-c65e865ed66a' : avatarId;
   const tag: Tag = {
     id,
     label,
     type,
+    avatarType,
+    avatarId: resolvedAvatarId,
   };
   await createTagDocument(tag);
 
@@ -121,9 +124,9 @@ const resizeIconFile = async (inputFilePath: string, outputFilePath: string) => 
     });
 };
 
-export const assignTagIconToTag = async (request: Request, response: Response, next: any) => {
-  const { tagId, iconFileName } = request.body;
-  await assignTagIconToDbTag(tagId, iconFileName);
+export const assignTagAvatarToTag = async (request: Request, response: Response, next: any) => {
+  const { tagId, avatarType, avatarId } = request.body;
+  await assignTagAvatarToDbTag(tagId, avatarType, avatarId);
   response.sendStatus(200);
 }
 
