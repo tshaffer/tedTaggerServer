@@ -18,6 +18,7 @@ import {
   uploadTagIconFile,
   deleteTagFromMediaItems,
   setViewSpecTagSpec,
+  getAppTagAvatars,
  } from '../controllers';
 import { addAppAvatars } from '../utilities/utilities';
 
@@ -41,6 +42,7 @@ export class Routes {
     app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     app.get('/api/v1/tags', getTags);
     app.get('/api/v1/viewSpec', getViewSpec);
+    app.get('/api/v1/appTagAvatars', getAppTagAvatars);
 
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)

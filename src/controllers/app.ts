@@ -17,8 +17,9 @@ import {
   setEndDateDb,
   getViewSpecFromDb,
   deleteTagFromDbMediaItems,
+  getAllAppTagAvatarsFromDb,
 } from './dbInterface';
-import { MediaItem, Tag } from '../types';
+import { AppTagAvatar, MediaItem, Tag } from '../types';
 import multer from 'multer';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
@@ -159,5 +160,10 @@ export const setEndDate = async (request: Request, response: Response, next: any
 export const getViewSpec = async (request: Request, response: Response, next: any) => {
   const viewSpec = await getViewSpecFromDb();
   response.json(viewSpec);
+};
+
+export const getAppTagAvatars = async (request: Request, response: Response, next: any) => {
+  const appTagAvatars: AppTagAvatar[] = await getAllAppTagAvatarsFromDb();
+  response.json(appTagAvatars);
 };
 

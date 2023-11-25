@@ -354,4 +354,21 @@ export const createAppTagAvatarDocument = async (appTagAvatar: AppTagAvatar): Pr
     });
 }
 
+export const getAllAppTagAvatarsFromDb = async (): Promise<AppTagAvatar[]> => {
+
+  const appTagAvatarModel = getAppTagAvatarModel();
+
+  const appTagAvatars: AppTagAvatar[] = [];
+  const documents: any = await (appTagAvatarModel as any).find().exec();
+  for (const document of documents) {
+    const appTagAvatar: AppTagAvatar = document.toObject() as AppTagAvatar;
+    appTagAvatar.id = document.id.toString();
+    appTagAvatar.label = document.label.toString();
+    appTagAvatar.pathToLarge = document.pathToLarge.toString();
+    appTagAvatar.path = document.path.toString();
+    appTagAvatars.push(appTagAvatar);
+  }
+  return appTagAvatars;
+}
+
 
