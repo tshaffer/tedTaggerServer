@@ -15,7 +15,7 @@ import {
   setEndDate,
   setStartDate,
   setViewSpecType,
-  uploadTagIconFile,
+  uploadUserAvatarFile,
   deleteTagFromMediaItems,
   setViewSpecTagSpec,
   getAppTagAvatars,
@@ -52,7 +52,7 @@ export class Routes {
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
 
     app.post('/api/v1/addUserAvatar', addUserAvatar)
-    app.post('/api/v1/uploadTagIconFile', uploadTagIconFile);
+    app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);
     app.post('/api/v1/assignTagAvatarToTag', assignTagAvatarToTag);
 
     app.post('/api/v1/setViewSpecType', setViewSpecType);

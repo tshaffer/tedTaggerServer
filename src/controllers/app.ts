@@ -82,7 +82,7 @@ export const deleteTagFromMediaItems = async (request: Request, response: Respon
   response.sendStatus(200);
 }
 
-export const uploadTagIconFile = async (request: Request, response: Response, next: any) => {
+export const uploadUserAvatarFile = async (request: Request, response: Response, next: any) => {
 
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -101,21 +101,21 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
     }
 
     const inputFilePath: string = request.file!.path; // 'public/userAvatars/morgan.png'
-    const iconFileName = path.parse(inputFilePath).name + '.jpg';
+    const avatarFileName = path.parse(inputFilePath).name + '.jpg';
     const outputFilePath: string = path.join(
       path.dirname(inputFilePath),
-      iconFileName);
-    resizeIconFile(inputFilePath, outputFilePath);
+      avatarFileName);
+    resizeAvatarFile(inputFilePath, outputFilePath);
 
     const responseData = {
       file: request.file,
-      iconFileName,
+      avatarFileName,
     };
     return response.status(200).send(responseData);
   });
 };
 
-const resizeIconFile = async (inputFilePath: string, outputFilePath: string) => {
+const resizeAvatarFile = async (inputFilePath: string, outputFilePath: string) => {
   const sharpPromise: Promise<any> = sharp(inputFilePath)
     .resize(undefined, 50, { fit: 'contain' })
     .jpeg()
