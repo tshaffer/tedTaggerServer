@@ -1,20 +1,22 @@
-import { isArray, isNil } from "lodash";
+import { isArray, isNil } from 'lodash';
 import {
   getAppTagAvatarModel,
   getMediaitemModel,
   getTagModel,
-} from "../models";
+  getUserTagAvatarModel,
+} from '../models';
 import {
   AppTagAvatar,
   MediaItem,
   Tag,
+  UserTagAvatar,
   ViewSpec,
   ViewSpecDb,
   ViewSpecTagType,
   ViewSpecType,
-} from "../types";
+} from '../types';
 import { Document } from 'mongoose';
-import { getViewSpecModel } from "../models/ViewSpec";
+import { getViewSpecModel } from '../models/ViewSpec';
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -371,5 +373,34 @@ export const getAllAppTagAvatarsFromDb = async (): Promise<AppTagAvatar[]> => {
   }
   return appTagAvatars;
 }
+
+export const createUserTagAvatarDocument = async (userTagAvatar: UserTagAvatar): Promise<string> => {
+  const userTagAvatarModel = getUserTagAvatarModel();
+  return userTagAvatarModel.create(userTagAvatar)
+    .then((userTagAvatarDocument: any) => {
+      const userTagAvatar: UserTagAvatar = userTagAvatarDocument.toObject() as UserTagAvatar;
+      const userTagAvatarId = userTagAvatar.id;
+      return Promise.resolve(userTagAvatarId);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}
+
+export const getAllUserTagAvatarsFromDb = async (): Promise<UserTagAvatar[]> => {
+
+  const userTagAvatarModel = getUserTagAvatarModel();
+
+  const userTagAvatars: UserTagAvatar[] = [];
+  const documents: any = await (userTagAvatarModel as any).find().exec();
+  for (const document of documents) {
+    const userTagAvatar: UserTagAvatar = document.toObject() as UserTagAvatar;
+    userTagAvatar.id = document.id.toString();
+    userTagAvatar.label = document.label.toString();
+    userTagAvatar.path = document.path.toString();
+    userTagAvatars.push(userTagAvatar);
+  }
+  return userTagAvatars;
+}
+
 
 

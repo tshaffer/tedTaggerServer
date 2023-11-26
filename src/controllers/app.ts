@@ -18,8 +18,10 @@ import {
   getViewSpecFromDb,
   deleteTagFromDbMediaItems,
   getAllAppTagAvatarsFromDb,
+  getAllUserTagAvatarsFromDb,
+  createUserTagAvatarDocument
 } from './dbInterface';
-import { AppTagAvatar, MediaItem, Tag } from '../types';
+import { AppTagAvatar, MediaItem, Tag, UserTagAvatar } from '../types';
 import multer from 'multer';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
@@ -169,4 +171,16 @@ export const getAppTagAvatars = async (request: Request, response: Response, nex
   const appTagAvatars: AppTagAvatar[] = await getAllAppTagAvatarsFromDb();
   response.json(appTagAvatars);
 };
+
+export const getUserTagAvatars = async (request: Request, response: Response, next: any) => {
+  const userTagAvatars: UserTagAvatar[] = await getAllUserTagAvatarsFromDb();
+  response.json(userTagAvatars);
+};
+
+export const addUserAvatar = async (request: Request, response: Response, next: any) => {
+  const { id, label, path } = request.body;
+  const userTagAvatar: UserTagAvatar = { id, label, path };
+  const avatarId: string = await createUserTagAvatarDocument(userTagAvatar);
+  response.json(avatarId);
+}
 
