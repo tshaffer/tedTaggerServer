@@ -86,7 +86,7 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
 
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, 'public/tagIconImages');
+      cb(null, 'public/userAvatars');
     },
     filename: function (req, file, cb) {
       cb(null, file.originalname);
@@ -100,7 +100,7 @@ export const uploadTagIconFile = async (request: Request, response: Response, ne
       return response.status(500).json(err);
     }
 
-    const inputFilePath: string = request.file!.path; // 'public/tagIconImages/morgan.png'
+    const inputFilePath: string = request.file!.path; // 'public/userAvatars/morgan.png'
     const iconFileName = path.parse(inputFilePath).name + '.jpg';
     const outputFilePath: string = path.join(
       path.dirname(inputFilePath),
