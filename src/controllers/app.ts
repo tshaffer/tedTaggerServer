@@ -11,11 +11,11 @@ import {
   assignTagAvatarToDbTag,
   addTagToDbMediaItems,
   getMediaItemsToDisplayFromDb,
-  setViewSpecTypeDb,
-  setViewSpecTagSpecDb,
+  setDateSelectorDb,
+  setTagSelectorDb,
   setStartDateDb,
   setEndDateDb,
-  getViewSpecFromDb,
+  getPhotosToDisplaySpecFromDb,
   deleteTagFromDbMediaItems,
   getAllAppTagAvatarsFromDb,
   getAllUserTagAvatarsFromDb,
@@ -23,6 +23,7 @@ import {
 } from './dbInterface';
 import { AppTagAvatar, MediaItem, Tag, UserTagAvatar } from '../types';
 import multer from 'multer';
+import { convertStringToDateSelectorEnum, convertStringToTagSelectorEnum } from '../utilities';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -33,11 +34,15 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 };
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
-  const viewSpec = request.query.viewSpec as string;
+  const dateSelector = request.query.dateSelector as string;
   const tagSpec = request.query.tagSpec as string;
   const startDate = request.query.startDate as string;
   const endDate = request.query.endDate as string;
-  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(viewSpec, tagSpec, startDate, endDate);
+  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
+    convertStringToDateSelectorEnum(dateSelector), 
+    convertStringToTagSelectorEnum(tagSpec),
+     startDate, 
+     endDate);
   response.json(mediaItems);
 };
 
@@ -132,19 +137,17 @@ export const assignTagAvatarToTag = async (request: Request, response: Response,
   response.sendStatus(200);
 }
 
-export const setViewSpecType = async (request: Request, response: Response, next: any) => {
-  console.log('setViewSpecType');
-  const { viewSpecType } = request.body;
-  setViewSpecTypeDb(viewSpecType);
+export const setDateSelector = async (request: Request, response: Response, next: any) => {
+  console.log('setDateSelector');
+  const { dateSelector } = request.body;
+  setDateSelectorDb(dateSelector);
   response.sendStatus(200);
 }
 
-export const setViewSpecTagSpec = async (request: Request, response: Response, next: any) => {
-  console.log('setViewSpecTagSpec');
-  const { viewSpecTagSpec } = request.body;
-  setViewSpecTagSpecDb(viewSpecTagSpec);
-  console.log('setViewSpecTagSpec');
-  console.log(viewSpecTagSpec);
+export const setTagSelector = async (request: Request, response: Response, next: any) => {
+  console.log('setTagSelectorSpec');
+  const { tagSelector } = request.body;
+  setTagSelectorDb(tagSelector);
   response.sendStatus(200);
 }
 
@@ -162,9 +165,9 @@ export const setEndDate = async (request: Request, response: Response, next: any
   response.sendStatus(200);
 }
 
-export const getViewSpec = async (request: Request, response: Response, next: any) => {
-  const viewSpec = await getViewSpecFromDb();
-  response.json(viewSpec);
+export const getPhotosToDisplaySpec = async (request: Request, response: Response, next: any) => {
+  const photosToDisplaySpec = await getPhotosToDisplaySpecFromDb();
+  response.json(photosToDisplaySpec);
 };
 
 export const getAppTagAvatars = async (request: Request, response: Response, next: any) => {

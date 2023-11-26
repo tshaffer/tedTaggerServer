@@ -8,21 +8,21 @@ import {
   getMediaItemsToDisplay,
   getTags,
   getVersion,
-  getViewSpec,
+  getPhotosToDisplaySpec,
   addTag,
   addTagToMediaItems,
   assignTagAvatarToTag,
   setEndDate,
   setStartDate,
-  setViewSpecType,
+  setDateSelector,
   uploadUserAvatarFile,
   deleteTagFromMediaItems,
-  setViewSpecTagSpec,
+  setTagSelector,
   getAppTagAvatars,
   getUserTagAvatars,
   addUserAvatar,
 } from '../controllers';
-import { addAppAvatars } from '../utilities/utilities';
+import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
 export class Routes {
 
@@ -41,9 +41,10 @@ export class Routes {
 
     app.get('/api/v1/version', getVersion);
     app.get('/api/v1/addAppAvatars', addAppAvatars)
+    app.get('/api/v1/createPhotosToDisplaySpec', createPhotosToDisplaySpec)
     app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     app.get('/api/v1/tags', getTags);
-    app.get('/api/v1/viewSpec', getViewSpec);
+    app.get('/api/v1/photosToDisplaySpec', getPhotosToDisplaySpec);
     app.get('/api/v1/appTagAvatars', getAppTagAvatars);
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
 
@@ -55,8 +56,8 @@ export class Routes {
     app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);
     app.post('/api/v1/assignTagAvatarToTag', assignTagAvatarToTag);
 
-    app.post('/api/v1/setViewSpecType', setViewSpecType);
-    app.post('/api/v1/setViewSpecTagSpec', setViewSpecTagSpec);
+    app.post('/api/v1/setDateSelector', setDateSelector);
+    app.post('/api/v1/setTagSelector', setTagSelector);
     app.post('/api/v1/setStartDate', setStartDate);
     app.post('/api/v1/setEndDate', setEndDate);
 

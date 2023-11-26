@@ -10,13 +10,12 @@ import {
   MediaItem,
   Tag,
   UserTagAvatar,
-  ViewSpec,
-  ViewSpecDb,
-  ViewSpecTagType,
-  ViewSpecType,
+  PhotosToDisplaySpec,
+  TagSelectorType,
+  DateSelectorType,
 } from '../types';
 import { Document } from 'mongoose';
-import { getViewSpecModel } from '../models/ViewSpec';
+import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -34,26 +33,26 @@ export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 }
 
 export const getMediaItemsToDisplayFromDb = async (
-  viewSpec: string,
-  tagSpec: string,
+  dateSelector: DateSelectorType,
+  tagSpec: TagSelectorType,
   startDate: string,
   endDate: string,
 ): Promise<MediaItem[]> => {
 
   let querySpec = {};
 
-  switch (viewSpec) {
-    case ViewSpecType.All.toString():
+  switch (dateSelector) {
+    case DateSelectorType.All:
     default: {
       break;
     }
-    case ViewSpecType.ByDateRange.toString(): {
+    case DateSelectorType.ByDateRange.toString(): {
       querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
       break;
     }
   }
 
-  if (tagSpec === 'untagged') {
+  if (tagSpec === TagSelectorType.Untagged) {
     querySpec = { ...querySpec, tagIds: { $size: 0 } };
   }
 
@@ -152,184 +151,142 @@ export const deleteTagFromDbMediaItems = async (mediaItemIds: string[], tagId: s
     })
 }
 
-const createViewSpecDocument = async (viewSpec: ViewSpecDb): Promise<Document | void> => {
-  const viewSpecModel = getViewSpecModel();
-  return viewSpecModel.create(viewSpec)
-    .then((viewSpecDocument: any) => {
-      return Promise.resolve(viewSpecDocument);
+export const createPhotosToDisplaySpecDocument = async (photosToDisplaySpec: PhotosToDisplaySpec): Promise<Document | void> => {
+  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  return photosToDisplaySpecModel.create(photosToDisplaySpec)
+    .then((photosToDisplaySpecDocument: any) => {
+      return Promise.resolve(photosToDisplaySpecDocument);
     }).catch((err: any) => {
       return Promise.reject(err);
     });
 }
 
-const updateViewSpecType = async (viewSpecType: number): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  const update: any = { type: viewSpecType };
-  const doc = await viewSpecModel.findOneAndUpdate({}, update, { new: true });
+const updateDateSelector = async (dateSelector: DateSelectorType): Promise<any> => {
+  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  const update: any = { dateSelector };
+  const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
 }
 
-export const setViewSpecTypeDb = async (viewSpecType: number): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  return viewSpecModel.find({}
-    , (err: any, viewSpecDocs: any) => {
+export const setDateSelectorDb = async (dateSelector: DateSelectorType): Promise<any> => {
+  const photosToDispaySpecModel = getPhotosToDisplaySpecModel();
+  return photosToDispaySpecModel.find({}
+    , (err: any, photosToDisplaySpecDocs: any) => {
       if (err) {
         console.log(err);
       } else
-        if (isArray(viewSpecDocs)) {
-          if (viewSpecDocs.length === 0) {
-            createViewSpecDocument({
-              type: viewSpecType,
-              tagSpec: ViewSpecTagType.Any,
-              startDate: new Date().toISOString(),
-              endDate: new Date().toISOString(),
-            })
-              .then((viewSpecDocument: any) => {
-                return Promise.resolve(viewSpecDocument);
-              });
-          } if (viewSpecDocs.length === 1) {
-            updateViewSpecType(viewSpecType);
+        if (isArray(photosToDisplaySpecDocs)) {
+          if (photosToDisplaySpecDocs.length === 0) {
+            throw new Error('photosToDisplaySpecDocs.length === 0');
+          } if (photosToDisplaySpecDocs.length === 1) {
+            updateDateSelector(dateSelector);
             return Promise.resolve();
           }
         } else {
-          console.log('viewSpecDocs is not an array');
-          return Promise.reject('viewSpecDocs is not an array');
+          console.log('photosToDisplaySpecDocs is not an array');
+          return Promise.reject('photosToDisplaySpecDocs is not an array');
         }
     });
 }
 
-const updateViewSpecTagSpec = async (viewSpecTagSpec: string): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  const update: any = { tagSpec: viewSpecTagSpec };
-  const doc = await viewSpecModel.findOneAndUpdate({}, update, { new: true });
+const updateTagSelector = async (tagSelector: string): Promise<any> => {
+  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  const update: any = { tagSpec: tagSelector };
+  const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
 }
 
-export const setViewSpecTagSpecDb = async (viewSpecTagSpec: string): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  return viewSpecModel.find({}
-    , (err: any, viewSpecDocs: any) => {
+export const setTagSelectorDb = async (tagSelector: TagSelectorType): Promise<any> => {
+  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  return photoToDisplaySpecModel.find({}
+    , (err: any, photosToDisplaySpecDocs: any) => {
       if (err) {
         console.log(err);
       } else
-        if (isArray(viewSpecDocs)) {
-          if (viewSpecDocs.length === 0) {
-            createViewSpecDocument({
-              type: ViewSpecType.All,
-              tagSpec: viewSpecTagSpec,
-              startDate: new Date().toISOString(),
-              endDate: new Date().toISOString(),
-            })
-              .then((viewSpecDocument: any) => {
-                return Promise.resolve(viewSpecDocument);
-              });
-          } if (viewSpecDocs.length === 1) {
-            updateViewSpecTagSpec(viewSpecTagSpec);
+        if (isArray(photosToDisplaySpecDocs)) {
+          if (photosToDisplaySpecDocs.length === 0) {
+            throw new Error('photosToDisplaySpecDocs.length === 0');
+          } if (photosToDisplaySpecDocs.length === 1) {
+            updateTagSelector(tagSelector);
             return Promise.resolve();
           }
         } else {
-          console.log('viewSpecDocs is not an array');
-          return Promise.reject('viewSpecDocs is not an array');
+          console.log('photosToDisplaySpecDocs is not an array');
+          return Promise.reject('photosToDisplaySpecDocs is not an array');
         }
     });
 }
 
 export const setStartDateDb = async (startDate: string): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  return viewSpecModel.find({}
-    , (err: any, viewSpecDocs: any) => {
+  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  return photoToDisplaySpecModel.find({}
+    , (err: any, photosToDisplaySpecDocs: any) => {
       if (err) {
         console.log(err);
       } else
-        if (isArray(viewSpecDocs)) {
-          if (viewSpecDocs.length === 0) {
-            createViewSpecDocument({
-              type: ViewSpecType.All,
-              tagSpec: ViewSpecTagType.Any,
-              startDate,
-              endDate: new Date().toISOString(),
-            })
-              .then((viewSpecDocument: any) => {
-                return Promise.resolve(viewSpecDocument);
-              });
-          } if (viewSpecDocs.length === 1) {
-            const viewSpecDoc: any = viewSpecDocs[0];
-            viewSpecDoc.startDate = startDate;
-            viewSpecDoc.save();
+        if (isArray(photosToDisplaySpecDocs)) {
+          if (photosToDisplaySpecDocs.length === 0) {
+            throw new Error('photosToDisplaySpecDocs.length === 0');
+          } if (photosToDisplaySpecDocs.length === 1) {
+            const photosToDisplaySpecDoc: any = photosToDisplaySpecDocs[0];
+            photosToDisplaySpecDoc.startDate = startDate;
+            photosToDisplaySpecDoc.save();
             return Promise.resolve();
           }
         } else {
-          console.log('viewSpecDocs is not an array');
-          return Promise.reject('viewSpecDocs is not an array');
+          console.log('photosToDisplaySpecDocs is not an array');
+          return Promise.reject('photosToDisplaySpecDocs is not an array');
         }
     });
 }
 
 export const setEndDateDb = async (endDate: string): Promise<any> => {
-  const viewSpecModel = getViewSpecModel();
-  return viewSpecModel.find({}
-    , (err: any, viewSpecDocs: any) => {
+  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  return photoToDisplaySpecModel.find({}
+    , (err: any, photosToDisplaySpecDocs: any) => {
       if (err) {
         console.log(err);
       } else
-        if (isArray(viewSpecDocs)) {
-          if (viewSpecDocs.length === 0) {
-            createViewSpecDocument({
-              type: ViewSpecType.All,
-              tagSpec: ViewSpecTagType.Any,
+        if (isArray(photosToDisplaySpecDocs)) {
+          if (photosToDisplaySpecDocs.length === 0) {
+            createPhotosToDisplaySpecDocument({
+              dateSelector: DateSelectorType.All,
+              tagSelector: TagSelectorType.Any,
               startDate: new Date().toISOString(),
               endDate,
             })
-              .then((viewSpecDocument: any) => {
-                return Promise.resolve(viewSpecDocument);
+              .then((photosToDisplayDocument: any) => {
+                return Promise.resolve(photosToDisplayDocument);
               });
-          } if (viewSpecDocs.length === 1) {
-            const viewSpecDoc: any = viewSpecDocs[0];
-            viewSpecDoc.endDate = endDate;
-            viewSpecDoc.save();
+          } if (photosToDisplaySpecDocs.length === 1) {
+            const photosToDisplayDoc: any = photosToDisplaySpecDocs[0];
+            photosToDisplayDoc.endDate = endDate;
+            photosToDisplayDoc.save();
             return Promise.resolve();
           }
         } else {
-          console.log('viewSpecDocs is not an array');
-          return Promise.reject('viewSpecDocs is not an array');
+          console.log('photosToDisplaySpecDocs is not an array');
+          return Promise.reject('photosToDisplaySpecDocs is not an array');
         }
     });
 }
 
-export const getViewSpecFromDb = async (): Promise<ViewSpec> => {
+export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpec> => {
 
-  const viewSpecModel = getViewSpecModel();
+  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
 
-  let viewSpec: ViewSpec = {
-    viewSpecType: ViewSpecType.All,
-    tagSpec: ViewSpecTagType.Any,
+  let photosToDisplaySpec: PhotosToDisplaySpec = {
+    dateSelector: DateSelectorType.All,
+    tagSelector: TagSelectorType.Any,
     startDate: new Date().toISOString(),
     endDate: new Date().toISOString(),
   };
 
-  const documents: any = await (viewSpecModel as any).find().exec();
-
-  for (const document of documents) {
-    const viewSpecDb: ViewSpecDb = document.toObject() as ViewSpecDb;
-    let viewSpecType: ViewSpecType = ViewSpecType.All;
-    const viewSpecTypeDb = viewSpecDb.type;
-    switch (viewSpecTypeDb) {
-      case ViewSpecType.All:
-      default: {
-        break;
-      }
-      case ViewSpecType.ByDateRange: {
-        viewSpecType = ViewSpecType.ByDateRange;
-        break;
-      }
-    }
-    viewSpec = {
-      viewSpecType,
-      tagSpec: viewSpecDb.tagSpec === ViewSpecTagType.Any ? ViewSpecTagType.Any : ViewSpecTagType.Untagged,
-      startDate: viewSpecDb.startDate,
-      endDate: viewSpecDb.endDate,
-    }
+  const documents: any = await (photoToDisplaySpecModel as any).find().exec();
+  if (documents.length === 0) {
+    throw new Error('photosToDisplaySpecDocs.length === 0');
   }
+  photosToDisplaySpec = documents[0].toObject() as PhotosToDisplaySpec;
 
-  return viewSpec;
+  return photosToDisplaySpec;
 }
 
 export const assignTagAvatarToDbTag = async (tagId: string, avatarType: string, avatarId: string): Promise<any> => {

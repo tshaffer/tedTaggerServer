@@ -32,26 +32,19 @@ export interface Tag {
   avatarId: string;
 }
 
-export enum ViewSpecType {
-  All,
-  ByDateRange,
+export enum DateSelectorType {
+  All = 'all',
+  ByDateRange = 'byDateRange',
 }
 
-export enum ViewSpecTagType {
+export enum TagSelectorType {
   Any = 'any',
   Untagged = 'untagged',
 }
 
-export interface ViewSpec {
-  viewSpecType: ViewSpecType;
-  tagSpec: ViewSpecTagType;
-  startDate: string;
-  endDate: string;
-}
-
-export interface ViewSpecDb {
-  type: number;
-  tagSpec: string;
+export interface PhotosToDisplaySpec {
+  dateSelector: DateSelectorType;
+  tagSelector: TagSelectorType;
   startDate: string;
   endDate: string;
 }
