@@ -338,6 +338,19 @@ export const assignTagAvatarToDbTag = async (tagId: string, avatarType: string, 
   }
 }
 
+export const updateDbTagLabel = async (tagId: string, tagLabel: string): Promise<any> => {
+
+  const tagModel = getTagModel();
+
+  const filter = { id: tagId };
+  const tagDocument: Document = await tagModel.findOne(filter);
+  if (!isNil(tagDocument)) {
+    tagDocument.set('label', tagLabel);
+    tagDocument.save();
+  }
+}
+
+
 export const createAppTagAvatarDocument = async (appTagAvatar: AppTagAvatar): Promise<Document | void> => {
   const appTagAvatarModel = getAppTagAvatarModel();
   return appTagAvatarModel.create(appTagAvatar)

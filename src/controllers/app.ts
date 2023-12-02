@@ -20,7 +20,8 @@ import {
   deleteTagFromDbMediaItems,
   getAllAppTagAvatarsFromDb,
   getAllUserTagAvatarsFromDb,
-  createUserTagAvatarDocument
+  createUserTagAvatarDocument,
+  updateDbTagLabel
 } from './dbInterface';
 import { AppTagAvatar, MediaItem, Tag, UserTagAvatar } from '../types';
 import multer from 'multer';
@@ -152,6 +153,12 @@ export const assignTagAvatarToTag = async (request: Request, response: Response,
   await assignTagAvatarToDbTag(tagId, avatarType, avatarId);
   response.sendStatus(200);
 }
+
+export const updateTagLabel = async (request: Request, response: Response, next: any) => {
+  const { tagId, tagLabel } = request.body;
+  await updateDbTagLabel(tagId, tagLabel);
+  response.sendStatus(200);
+};
 
 export const setDateSelector = async (request: Request, response: Response, next: any) => {
   console.log('setDateSelector');

@@ -13,6 +13,7 @@ import {
   addTagToMediaItems,
   replaceTagInMediaItems,
   assignTagAvatarToTag,
+  updateTagLabel,
   setEndDate,
   setStartDate,
   setDateSelector,
@@ -57,6 +58,7 @@ export class Routes {
     app.post('/api/v1/addUserAvatar', addUserAvatar)
     app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);
     app.post('/api/v1/assignTagAvatarToTag', assignTagAvatarToTag);
+    app.post('/api/v1/updateTagLabel', updateTagLabel);
 
     app.post('/api/v1/setDateSelector', setDateSelector);
     app.post('/api/v1/setTagSelector', setTagSelector);
