@@ -126,6 +126,40 @@ export const addTagToDbMediaItems = async (mediaItemIds: string[], tagId: string
     })
 }
 
+export const replaceTagInDbMediaItem = async (mediaItemId: string, existingTagId: string, newTagId: string): Promise<any> => {
+
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItemId };
+
+  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
+
+  // probably a better way to do this
+  const indexOfExistingTagId = mediaItemDocument.get('tagIds').indexOf(existingTagId);
+  if (indexOfExistingTagId > -1) {
+    mediaItemDocument.get('tagIds')[indexOfExistingTagId] = newTagId;
+    mediaItemDocument.markModified('tagIds');
+    return await mediaItemDocument.save();
+  }
+
+  console.log('existingTagId not found in mediaItemDocument');
+  return Promise.resolve();
+}
+
+
+export const replaceTagInDbMediaItems = async (mediaItemIds: string[], existingTagId: string, newTagId: string): Promise<any> => {
+
+  // better db interface to do the this??
+
+  const promises: Promise<any>[] = [];
+  mediaItemIds.forEach((mediaItemId: string) => {
+    promises.push(replaceTagInDbMediaItem(mediaItemId, existingTagId, newTagId));
+  });
+  return Promise.all(promises)
+    .then(() => {
+      return Promise.resolve();
+    })
+}
+
 export const deleteTagFromDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
 
   const mediaItemModel = getMediaitemModel();

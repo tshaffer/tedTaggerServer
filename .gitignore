@@ -4,4 +4,5 @@ src/config/config.env
 public/images
 public/userAvatars
 public/appAvatars
+public/backupAppAvatars
 

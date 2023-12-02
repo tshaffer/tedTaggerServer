@@ -11,6 +11,7 @@ import {
   getPhotosToDisplaySpec,
   addTag,
   addTagToMediaItems,
+  replaceTagInMediaItems,
   assignTagAvatarToTag,
   setEndDate,
   setStartDate,
@@ -50,6 +51,7 @@ export class Routes {
 
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
+    app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems)
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
 
     app.post('/api/v1/addUserAvatar', addUserAvatar)

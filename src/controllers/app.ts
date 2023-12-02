@@ -10,6 +10,7 @@ import {
   getAllTagsFromDb,
   assignTagAvatarToDbTag,
   addTagToDbMediaItems,
+  replaceTagInDbMediaItems,
   getMediaItemsToDisplayFromDb,
   setDateSelectorDb,
   setTagSelectorDb,
@@ -76,6 +77,21 @@ export const addTagToMediaItems = async (request: Request, response: Response, n
 
   response.sendStatus(200);
 }
+
+export const replaceTagInMediaItems = async (request: Request, response: Response, next: any) => {
+
+  const { mediaItemIds, existingTagId, newTagId  } = request.body;
+
+  console.log('replaceTagInMediaItems');
+  console.log(mediaItemIds);
+  console.log('existingTagId: ', existingTagId); 
+  console.log('newTagId: ', newTagId);
+
+  await replaceTagInDbMediaItems(mediaItemIds, existingTagId, newTagId);
+
+  response.sendStatus(200);
+}
+
 
 
 export const deleteTagFromMediaItems = async (request: Request, response: Response, next: any) => {
