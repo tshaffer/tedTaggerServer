@@ -194,6 +194,11 @@ export const getPhotosToDisplaySpec = async (request: Request, response: Respons
   response.json(photosToDisplaySpec);
 };
 
+export const getDefaultAvatarId = async (request: Request, response: Response, next: any) => {
+  const defaultAvatarId: string = '430b3cf0-33e7-4e72-a85b-c65e865ed66a';
+  response.json(defaultAvatarId);
+};
+
 export const getAppTagAvatars = async (request: Request, response: Response, next: any) => {
   const appTagAvatars: AppTagAvatar[] = await getAllAppTagAvatarsFromDb();
   response.json(appTagAvatars);

@@ -23,6 +23,7 @@ import {
   getAppTagAvatars,
   getUserTagAvatars,
   addUserAvatar,
+  getDefaultAvatarId,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -47,6 +48,7 @@ export class Routes {
     app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
     app.get('/api/v1/tags', getTags);
     app.get('/api/v1/photosToDisplaySpec', getPhotosToDisplaySpec);
+    app.get('/api/v1/defaultAvatarId', getDefaultAvatarId);
     app.get('/api/v1/appTagAvatars', getAppTagAvatars);
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
 
