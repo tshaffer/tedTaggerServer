@@ -37,12 +37,12 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
   const dateSelector = request.query.dateSelector as string;
-  const tagSpec = request.query.tagSpec as string;
+  const tagSelector = request.query.tagSelector as string;  // untagged'
   const startDate = request.query.startDate as string;
   const endDate = request.query.endDate as string;
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
     convertStringToDateSelectorEnum(dateSelector), 
-    convertStringToTagSelectorEnum(tagSpec),
+    convertStringToTagSelectorEnum(tagSelector),
      startDate, 
      endDate);
   response.json(mediaItems);
