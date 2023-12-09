@@ -57,6 +57,7 @@ export const addTag = async (request: Request, response: Response, next: any) =>
 
   const { id, label, type, avatarType, avatarId } = request.body;
 
+  // TEDTODO
   let resolvedAvatarId = avatarId === '' ? '430b3cf0-33e7-4e72-a85b-c65e865ed66a' : avatarId;
   const tag: Tag = {
     id,
