@@ -6,8 +6,8 @@ const Schema = mongoose.Schema;
 const UserTagAvatarSchema = new Schema(
   {
     id: { type: String, required: true, unique: true },
-    label: { type: String, required: true, unique: true },
-    path: { type: String, required: true, unique: true },
+    label: { type: String, required: true },
+    path: { type: String, required: true },
   }
 );
 
