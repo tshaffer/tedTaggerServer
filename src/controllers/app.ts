@@ -12,24 +12,21 @@ import {
   addTagToDbMediaItems,
   replaceTagInDbMediaItems,
   getMediaItemsToDisplayFromDb,
-  // setDateSelectorDb,
   setTagSelectorDb,
-  // setStartDateDb,
-  // setEndDateDb,
   getPhotosToDisplaySpecFromDb,
   deleteTagFromDbMediaItems,
   getAllAppTagAvatarsFromDb,
   getAllUserTagAvatarsFromDb,
   createUserTagAvatarDocument,
   updateDbTagLabel,
-  setDateRangeSpecificationDb
+  setDateRangeSpecificationDb,
+  setTagExistenceSpecificationDb
 } from './dbInterface';
-import { AppTagAvatar, MediaItem, Tag, UserTagAvatar } from '../types';
+import { AppTagAvatar, MediaItem, Tag, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
-import { 
-  // convertStringToDateSelectorEnum, 
+import {
   convertStringToTagSelectorEnum
- } from '../utilities';
+} from '../utilities';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -40,12 +37,22 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 };
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
-  // const dateSelector = request.query.dateSelector as string;
-  // const tagSelector = request.query.tagSelector as string;  // untagged'
-  // const startDate = request.query.startDate as string;
-  // const endDate = request.query.endDate as string;
+  console.log('getMediaItemsToDisplay');
+  const specifyDateRange: boolean = JSON.parse(request.query.specifyDateRange as string);
+  const startDate: string | null = request.query.startDate ? request.query.startDate as string : null;
+  const endDate: string | null = request.query.endDate ? request.query.endDate as string : null;
+  const specifyTagExistence: boolean = JSON.parse(request.query.specifyTagExistence as string);
+  const tagSelector: TagSelectorType | null = request.query.tagSelector ? convertStringToTagSelectorEnum(request.query.tagSelector as string) : null;
+  const specifyTags: boolean = JSON.parse(request.query.specifyTags as string);
+
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
-     );
+    specifyDateRange,
+    startDate,
+    endDate,
+    specifyTagExistence,
+    tagSelector,
+    specifyTags
+  );
   response.json(mediaItems);
 };
 
@@ -83,11 +90,11 @@ export const addTagToMediaItems = async (request: Request, response: Response, n
 
 export const replaceTagInMediaItems = async (request: Request, response: Response, next: any) => {
 
-  const { mediaItemIds, existingTagId, newTagId  } = request.body;
+  const { mediaItemIds, existingTagId, newTagId } = request.body;
 
   console.log('replaceTagInMediaItems');
   console.log(mediaItemIds);
-  console.log('existingTagId: ', existingTagId); 
+  console.log('existingTagId: ', existingTagId);
   console.log('newTagId: ', newTagId);
 
   await replaceTagInDbMediaItems(mediaItemIds, existingTagId, newTagId);
@@ -163,22 +170,14 @@ export const updateTagLabel = async (request: Request, response: Response, next:
 };
 
 export const setDateRangeSpecification = async (request: Request, response: Response, next: any) => {
-  console.log('setDateSelector');
-  /*
-  specifyDateRange: boolean;
-  startDate?: string;
-  endDate?: string;
-  */
-
   const { specifyDateRange, startDate, endDate } = request.body;
   setDateRangeSpecificationDb(specifyDateRange, startDate, endDate);
   response.sendStatus(200);
 }
 
 export const setTagExistenceSpecification = async (request: Request, response: Response, next: any) => {
-  console.log('setDateSelector');
-  const { dateSelector } = request.body;
-  // setDateSelectorDb(dateSelector);
+  const { specifyTagExistence, tagSelector } = request.body;
+  setTagExistenceSpecificationDb(specifyTagExistence, tagSelector);
   response.sendStatus(200);
 }
 

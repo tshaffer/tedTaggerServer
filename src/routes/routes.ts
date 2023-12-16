@@ -65,7 +65,6 @@ export class Routes {
     app.post('/api/v1/assignTagAvatarToTag', assignTagAvatarToTag);
     app.post('/api/v1/updateTagLabel', updateTagLabel);
 
-    // app.post('/api/v1/setDateSelector', setDateSelector);
     app.post('/api/v1/setTagSelector', setTagSelector);
     app.post('/api/v1/setStartDate', setStartDate);
     app.post('/api/v1/setEndDate', setEndDate);
