@@ -5,10 +5,12 @@ const Schema = mongoose.Schema;
 
 const PhotosToDisplaySpecSchema = new Schema(
   {
-    dateSelector: { type: String, required: true, unique: true },
-    tagSelector: { type: String, required: true, unique: true },
-    startDate: { type: String, required: true, unique: true },
-    endDate: { type: String, required: true, unique: true },
+    specifyDateRange: { type: Boolean, required: true, unique: true },
+    startDate: { type: String },
+    endDate: { type: String },
+    specifyTagExistence: { type: Boolean, required: true, unique: true },
+    tagSelector: { type: String },
+    specifyTags: { type: Boolean, required: true, unique: true },
   }
 );
 

@@ -1,7 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Request, Response } from 'express';
 
-import { AppTagAvatar, DateSelectorType, TagSelectorType } from '../types';
+import { 
+  AppTagAvatar, 
+  // DateSelectorType, 
+  PhotosToDisplaySpec, 
+  TagSelectorType
+ } from '../types';
 import { createAppTagAvatarDocument, createPhotosToDisplaySpecDocument } from "../controllers";
 
 export const addAppAvatars = async (request: Request, response: Response, next: any) => {
@@ -59,29 +64,39 @@ const addAppAvatar = async (appTagAvatar: AppTagAvatar) => {
 
 export const createPhotosToDisplaySpec = async (request: Request, response: Response, next: any) => {
 
-  const photosToDisplaySpec = {
-    dateSelector: DateSelectorType.All,
-    tagSelector: TagSelectorType.Any,
-    startDate: new Date('January 1, 2000 00:00:00').toISOString(),
-    endDate: new Date('January 1, 2020 00:00:00').toISOString(),
+  const photosToDisplaySpec: PhotosToDisplaySpec = {
+    specifyDateRange: false,
+    specifyTagExistence: false,
+    specifyTags: false,
+    // dateSelector: DateSelectorType.All,
+    // tagSelector: TagSelectorType.Any,
+    // startDate: new Date().toISOString(),
+    // endDate: new Date().toISOString(),
   };
+
+  // const photosToDisplaySpec = {
+  //   dateSelector: DateSelectorType.All,
+  //   tagSelector: TagSelectorType.Any,
+  //   startDate: new Date('January 1, 2000 00:00:00').toISOString(),
+  //   endDate: new Date('January 1, 2020 00:00:00').toISOString(),
+  // };
   await createPhotosToDisplaySpecDocument(photosToDisplaySpec);
 
   response.sendStatus(200);
 
 };
 
-export function convertStringToDateSelectorEnum(value: string): DateSelectorType | undefined {
-  const enumKeys = Object.keys(DateSelectorType) as (keyof typeof DateSelectorType)[];
+// export function convertStringToDateSelectorEnum(value: string): DateSelectorType | undefined {
+//   const enumKeys = Object.keys(DateSelectorType) as (keyof typeof DateSelectorType)[];
 
-  for (const key of enumKeys) {
-    if (DateSelectorType[key] === value) {
-      return DateSelectorType[key];
-    }
-  }
+//   for (const key of enumKeys) {
+//     if (DateSelectorType[key] === value) {
+//       return DateSelectorType[key];
+//     }
+//   }
 
-  return undefined;
-}
+//   return undefined;
+// }
 
 export function convertStringToTagSelectorEnum(value: string): TagSelectorType | undefined {
   const enumKeys = Object.keys(TagSelectorType) as (keyof typeof TagSelectorType)[];

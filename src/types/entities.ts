@@ -32,21 +32,38 @@ export interface Tag {
   avatarId: string;
 }
 
-export enum DateSelectorType {
-  All = 'all',
-  ByDateRange = 'byDateRange',
-}
+// export enum DateSelectorType {
+//   All = 'all',
+//   ByDateRange = 'byDateRange',
+// }
 
 export enum TagSelectorType {
-  Any = 'any',
   Untagged = 'untagged',
+  Tagged = 'tagged',
 }
 
 export interface PhotosToDisplaySpec {
-  dateSelector: DateSelectorType;
-  tagSelector: TagSelectorType;
-  startDate: string;
-  endDate: string;
+  // dateSelector: DateSelectorType;
+  // tagSelector: TagSelectorType;
+  // startDate: string;
+  // endDate: string;
+  specifyDateRange: boolean;
+  startDate?: string;
+  endDate?: string;
+  specifyTagExistence: boolean;
+  tagSelector?: TagSelectorType;
+  specifyTags: boolean;
+}
+
+export interface DateRangeSpecification {
+  specifyDateRange: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface TagExistenceSpecification {
+  specifyTagExistence: boolean;
+  tagSelector?: TagSelectorType;
 }
 
 export interface AppTagAvatar {

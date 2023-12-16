@@ -12,7 +12,7 @@ import {
   UserTagAvatar,
   PhotosToDisplaySpec,
   TagSelectorType,
-  DateSelectorType,
+  // DateSelectorType,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
@@ -33,28 +33,24 @@ export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 }
 
 export const getMediaItemsToDisplayFromDb = async (
-  dateSelector: DateSelectorType,
-  tagSpec: TagSelectorType,
-  startDate: string,
-  endDate: string,
 ): Promise<MediaItem[]> => {
 
   let querySpec = {};
 
-  switch (dateSelector) {
-    case DateSelectorType.All:
-    default: {
-      break;
-    }
-    case DateSelectorType.ByDateRange.toString(): {
-      querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
-      break;
-    }
-  }
+  // switch (dateSelector) {
+  //   case DateSelectorType.All:
+  //   default: {
+  //     break;
+  //   }
+  //   case DateSelectorType.ByDateRange.toString(): {
+  //     querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
+  //     break;
+  //   }
+  // }
 
-  if (tagSpec === TagSelectorType.Untagged) {
-    querySpec = { ...querySpec, tagIds: { $size: 0 } };
-  }
+  // if (tagSpec === TagSelectorType.Untagged) {
+  //   querySpec = { ...querySpec, tagIds: { $size: 0 } };
+  // }
 
   const mediaItemModel = getMediaitemModel();
 
@@ -195,15 +191,20 @@ export const createPhotosToDisplaySpecDocument = async (photosToDisplaySpec: Pho
     });
 }
 
-const updateDateSelector = async (dateSelector: DateSelectorType): Promise<any> => {
-  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  const update: any = { dateSelector };
+const updateDateRangeSpecificationSelector = async (photosToDisplaySpecModel: any, specifyDateRange: boolean, startDate?: string, endDate?: string): Promise<any> => {
+  const update: any = { specifyDateRange };
+  if (startDate) {
+    update.startDate = startDate;
+  }
+  if (endDate) {
+    update.endDate = endDate;
+  }
   const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
 }
 
-export const setDateSelectorDb = async (dateSelector: DateSelectorType): Promise<any> => {
-  const photosToDispaySpecModel = getPhotosToDisplaySpecModel();
-  return photosToDispaySpecModel.find({}
+export const setDateRangeSpecificationDb = async (specifyDateRange: boolean, startDate?: string, endDate?: string): Promise<any> => {
+  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
+  return photosToDisplaySpecModel.find({}
     , (err: any, photosToDisplaySpecDocs: any) => {
       if (err) {
         console.log(err);
@@ -212,7 +213,7 @@ export const setDateSelectorDb = async (dateSelector: DateSelectorType): Promise
           if (photosToDisplaySpecDocs.length === 0) {
             throw new Error('photosToDisplaySpecDocs.length === 0');
           } if (photosToDisplaySpecDocs.length === 1) {
-            updateDateSelector(dateSelector);
+            updateDateRangeSpecificationSelector(photosToDisplaySpecModel, specifyDateRange, startDate, endDate);
             return Promise.resolve();
           }
         } else {
@@ -221,6 +222,33 @@ export const setDateSelectorDb = async (dateSelector: DateSelectorType): Promise
         }
     });
 }
+
+// const updateDateSelector = async (dateSelector: DateSelectorType): Promise<any> => {
+//   const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
+//   const update: any = { dateSelector };
+//   const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
+// }
+
+// export const setDateSelectorDb = async (dateSelector: DateSelectorType): Promise<any> => {
+//   const photosToDispaySpecModel = getPhotosToDisplaySpecModel();
+//   return photosToDispaySpecModel.find({}
+//     , (err: any, photosToDisplaySpecDocs: any) => {
+//       if (err) {
+//         console.log(err);
+//       } else
+//         if (isArray(photosToDisplaySpecDocs)) {
+//           if (photosToDisplaySpecDocs.length === 0) {
+//             throw new Error('photosToDisplaySpecDocs.length === 0');
+//           } if (photosToDisplaySpecDocs.length === 1) {
+//             updateDateSelector(dateSelector);
+//             return Promise.resolve();
+//           }
+//         } else {
+//           console.log('photosToDisplaySpecDocs is not an array');
+//           return Promise.reject('photosToDisplaySpecDocs is not an array');
+//         }
+//     });
+// }
 
 const updateTagSelector = async (tagSelector: string): Promise<any> => {
   const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
@@ -249,76 +277,83 @@ export const setTagSelectorDb = async (tagSelector: TagSelectorType): Promise<an
     });
 }
 
-export const setStartDateDb = async (startDate: string): Promise<any> => {
-  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  return photoToDisplaySpecModel.find({}
-    , (err: any, photosToDisplaySpecDocs: any) => {
-      if (err) {
-        console.log(err);
-      } else
-        if (isArray(photosToDisplaySpecDocs)) {
-          if (photosToDisplaySpecDocs.length === 0) {
-            throw new Error('photosToDisplaySpecDocs.length === 0');
-          } if (photosToDisplaySpecDocs.length === 1) {
-            const photosToDisplaySpecDoc: any = photosToDisplaySpecDocs[0];
-            photosToDisplaySpecDoc.startDate = startDate;
-            photosToDisplaySpecDoc.save();
-            return Promise.resolve();
-          }
-        } else {
-          console.log('photosToDisplaySpecDocs is not an array');
-          return Promise.reject('photosToDisplaySpecDocs is not an array');
-        }
-    });
-}
+// export const setStartDateDb = async (startDate: string): Promise<any> => {
+//   const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
+//   return photoToDisplaySpecModel.find({}
+//     , (err: any, photosToDisplaySpecDocs: any) => {
+//       if (err) {
+//         console.log(err);
+//       } else
+//         if (isArray(photosToDisplaySpecDocs)) {
+//           if (photosToDisplaySpecDocs.length === 0) {
+//             throw new Error('photosToDisplaySpecDocs.length === 0');
+//           } if (photosToDisplaySpecDocs.length === 1) {
+//             const photosToDisplaySpecDoc: any = photosToDisplaySpecDocs[0];
+//             photosToDisplaySpecDoc.startDate = startDate;
+//             photosToDisplaySpecDoc.save();
+//             return Promise.resolve();
+//           }
+//         } else {
+//           console.log('photosToDisplaySpecDocs is not an array');
+//           return Promise.reject('photosToDisplaySpecDocs is not an array');
+//         }
+//     });
+// }
 
-export const setEndDateDb = async (endDate: string): Promise<any> => {
-  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  return photoToDisplaySpecModel.find({}
-    , (err: any, photosToDisplaySpecDocs: any) => {
-      if (err) {
-        console.log(err);
-      } else
-        if (isArray(photosToDisplaySpecDocs)) {
-          if (photosToDisplaySpecDocs.length === 0) {
-            createPhotosToDisplaySpecDocument({
-              dateSelector: DateSelectorType.All,
-              tagSelector: TagSelectorType.Any,
-              startDate: new Date().toISOString(),
-              endDate,
-            })
-              .then((photosToDisplayDocument: any) => {
-                return Promise.resolve(photosToDisplayDocument);
-              });
-          } if (photosToDisplaySpecDocs.length === 1) {
-            const photosToDisplayDoc: any = photosToDisplaySpecDocs[0];
-            photosToDisplayDoc.endDate = endDate;
-            photosToDisplayDoc.save();
-            return Promise.resolve();
-          }
-        } else {
-          console.log('photosToDisplaySpecDocs is not an array');
-          return Promise.reject('photosToDisplaySpecDocs is not an array');
-        }
-    });
-}
+// export const setEndDateDb = async (endDate: string): Promise<any> => {
+//   const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
+//   return photoToDisplaySpecModel.find({}
+//     , (err: any, photosToDisplaySpecDocs: any) => {
+//       if (err) {
+//         console.log(err);
+//       } else
+//         if (isArray(photosToDisplaySpecDocs)) {
+//           if (photosToDisplaySpecDocs.length === 0) {
+//             createPhotosToDisplaySpecDocument({
+//               dateSelector: DateSelectorType.All,
+//               tagSelector: TagSelectorType.Any,
+//               startDate: new Date().toISOString(),
+//               endDate,
+//             })
+//               .then((photosToDisplayDocument: any) => {
+//                 return Promise.resolve(photosToDisplayDocument);
+//               });
+//           } if (photosToDisplaySpecDocs.length === 1) {
+//             const photosToDisplayDoc: any = photosToDisplaySpecDocs[0];
+//             photosToDisplayDoc.endDate = endDate;
+//             photosToDisplayDoc.save();
+//             return Promise.resolve();
+//           }
+//         } else {
+//           console.log('photosToDisplaySpecDocs is not an array');
+//           return Promise.reject('photosToDisplaySpecDocs is not an array');
+//         }
+//     });
+// }
 
 export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpec> => {
+
+  console.log('getPhotosToDisplaySpecFromDb');
 
   const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
 
   let photosToDisplaySpec: PhotosToDisplaySpec = {
-    dateSelector: DateSelectorType.All,
-    tagSelector: TagSelectorType.Any,
-    startDate: new Date().toISOString(),
-    endDate: new Date().toISOString(),
+    specifyDateRange: false,
+    specifyTagExistence: false,
+    specifyTags: false,
+    // dateSelector: DateSelectorType.All,
+    // tagSelector: TagSelectorType.Any,
+    // startDate: new Date().toISOString(),
+    // endDate: new Date().toISOString(),
   };
 
   const documents: any = await (photoToDisplaySpecModel as any).find().exec();
   if (documents.length === 0) {
-    throw new Error('photosToDisplaySpecDocs.length === 0');
+    // throw new Error('photosToDisplaySpecDocs.length === 0');
+    console.log('photosToDisplaySpecDocs.length === 0');
+  } else {
+    photosToDisplaySpec = documents[0].toObject() as PhotosToDisplaySpec;
   }
-  photosToDisplaySpec = documents[0].toObject() as PhotosToDisplaySpec;
 
   return photosToDisplaySpec;
 }
