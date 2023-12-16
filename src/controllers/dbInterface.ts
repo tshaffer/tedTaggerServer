@@ -211,7 +211,17 @@ export const setDateRangeSpecificationDb = async (specifyDateRange: boolean, sta
       } else
         if (isArray(photosToDisplaySpecDocs)) {
           if (photosToDisplaySpecDocs.length === 0) {
-            throw new Error('photosToDisplaySpecDocs.length === 0');
+            // throw new Error('photosToDisplaySpecDocs.length === 0');
+            createPhotosToDisplaySpecDocument({
+              specifyDateRange,
+              startDate,
+              endDate,
+              specifyTagExistence: false,
+              specifyTags: false,
+            })
+              .then((photosToDisplayDocument: any) => {
+                return Promise.resolve();
+              });
           } if (photosToDisplaySpecDocs.length === 1) {
             updateDateRangeSpecificationSelector(photosToDisplaySpecModel, specifyDateRange, startDate, endDate);
             return Promise.resolve();
