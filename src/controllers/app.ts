@@ -43,7 +43,8 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
   const endDate: string | null = request.query.endDate ? request.query.endDate as string : null;
   const specifyTagExistence: boolean = JSON.parse(request.query.specifyTagExistence as string);
   const tagSelector: TagSelectorType | null = request.query.tagSelector ? convertStringToTagSelectorEnum(request.query.tagSelector as string) : null;
-  const specifyTags: boolean = JSON.parse(request.query.specifyTags as string);
+  const specifySearchWithTags: boolean = JSONparse(request.query.specifySearchWithTags as string);
+  const tagIds: string[] = request.query.tagIds ? (request.query.tagIds as string).split(',') : [];
 
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
     specifyDateRange,
@@ -51,7 +52,8 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
     endDate,
     specifyTagExistence,
     tagSelector,
-    specifyTags
+    specifySearchWithTags,
+    tagIds,
   );
   response.json(mediaItems);
 };

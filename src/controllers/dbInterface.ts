@@ -36,7 +36,8 @@ export const getMediaItemsToDisplayFromDb = async (
   endDate: string | null,
   specifyTagExistence: boolean,
   tagSelector: TagSelectorType | null,
-  specifyTags: boolean = false,
+  specifySearchWithTags: boolean = false,
+  tagIds: string[] = [],
 ): Promise<MediaItem[]> => {
 
   let querySpec = {};
@@ -222,7 +223,8 @@ export const setDateRangeSpecificationDb = async (specifyDateRange: boolean, sta
               startDate,
               endDate,
               specifyTagExistence: false,
-              specifyTags: false,
+              specifySearchWithTags: false,
+              tagIds: [],
             })
               .then((photosToDisplayDocument: any) => {
                 return Promise.resolve();
@@ -259,7 +261,8 @@ export const setTagExistenceSpecificationDb = async (specifyTagExistence: boolea
               specifyDateRange: false,
               specifyTagExistence,
               tagSelector,
-              specifyTags: false,
+              specifySearchWithTags: false,
+              tagIds: [],
             })
               .then((photosToDisplayDocument: any) => {
                 return Promise.resolve();
@@ -312,7 +315,8 @@ export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpe
   let photosToDisplaySpec: PhotosToDisplaySpec = {
     specifyDateRange: false,
     specifyTagExistence: false,
-    specifyTags: false,
+    specifySearchWithTags: false,
+    tagIds: [],
   };
 
   const documents: any = await (photoToDisplaySpecModel as any).find().exec();

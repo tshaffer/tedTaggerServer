@@ -10,7 +10,8 @@ const PhotosToDisplaySpecSchema = new Schema(
     endDate: { type: String },
     specifyTagExistence: { type: Boolean, required: true, unique: true },
     tagSelector: { type: String },
-    specifyTags: { type: Boolean, required: true, unique: true },
+    specifySearchWithTags: { type: Boolean, required: true, unique: true },
+    tagIds: { type: [String] },
   }
 );
 
