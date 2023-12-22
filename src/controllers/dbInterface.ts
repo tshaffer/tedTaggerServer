@@ -57,6 +57,11 @@ export const getMediaItemsToDisplayFromDb = async (
         break;
     }
   }
+  if (specifySearchWithTags && tagIds.length > 0) {
+    querySpec = { ...querySpec, tagIds: { $in: tagIds } };
+  }
+
+  console.log('getMediaItemsToDisplayFromDb querySpec: ', querySpec);
 
   const mediaItemModel = getMediaitemModel();
 
