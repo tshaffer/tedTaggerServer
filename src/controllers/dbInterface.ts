@@ -12,6 +12,7 @@ import {
   UserTagAvatar,
   PhotosToDisplaySpec,
   TagSelectorType,
+  TagSearchOperator,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
@@ -38,6 +39,7 @@ export const getMediaItemsToDisplayFromDb = async (
   tagSelector: TagSelectorType | null,
   specifySearchWithTags: boolean = false,
   tagIds: string[] = [],
+  tagSearchOperator: TagSearchOperator | null,
 ): Promise<MediaItem[]> => {
 
   let querySpec = {};
@@ -58,7 +60,12 @@ export const getMediaItemsToDisplayFromDb = async (
     }
   }
   if (specifySearchWithTags && tagIds.length > 0) {
-    querySpec = { ...querySpec, tagIds: { $in: tagIds } };
+    const tagSearchOperatorValue: string = isNil(tagSearchOperator) ? TagSearchOperator.OR : tagSearchOperator;
+    if (tagSearchOperatorValue === TagSearchOperator.AND) {
+      querySpec = { ...querySpec, tagIds: { $all: tagIds } };
+    } else {
+      querySpec = { ...querySpec, tagIds: { $in: tagIds } };
+    }
   }
 
   console.log('getMediaItemsToDisplayFromDb querySpec: ', querySpec);

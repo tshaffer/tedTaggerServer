@@ -5,6 +5,7 @@ import {
   AppTagAvatar, 
   // DateSelectorType, 
   PhotosToDisplaySpec, 
+  TagSearchOperator, 
   TagSelectorType
  } from '../types';
 import { createAppTagAvatarDocument, createPhotosToDisplaySpecDocument } from "../controllers";
@@ -78,6 +79,16 @@ export function convertStringToTagSelectorEnum(value: string): TagSelectorType |
   for (const key of enumKeys) {
     if (TagSelectorType[key] === value) {
       return TagSelectorType[key];
+    }
+  }
+  return undefined;
+}
+
+export function convertStringToTagSearchOperatorEnum(value: string): TagSearchOperator | undefined {
+  const enumKeys = Object.keys(TagSearchOperator) as (keyof typeof TagSearchOperator)[];
+  for (const key of enumKeys) {
+    if (TagSearchOperator[key] === value) {
+      return TagSearchOperator[key];
     }
   }
   return undefined;

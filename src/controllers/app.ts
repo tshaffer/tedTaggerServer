@@ -22,9 +22,10 @@ import {
   setDateRangeSpecificationDb,
   setTagExistenceSpecificationDb
 } from './dbInterface';
-import { AppTagAvatar, MediaItem, Tag, TagSelectorType, UserTagAvatar } from '../types';
+import { AppTagAvatar, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
 import {
+  convertStringToTagSearchOperatorEnum,
   convertStringToTagSelectorEnum
 } from '../utilities';
 
@@ -45,7 +46,7 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
   const tagSelector: TagSelectorType | null = request.query.tagSelector ? convertStringToTagSelectorEnum(request.query.tagSelector as string) : null;
   const specifySearchWithTags: boolean = JSON.parse(request.query.specifySearchWithTags as string);
   const tagIds: string[] = request.query.tagIds ? (request.query.tagIds as string).split(',') : [];
-
+  const tagSearchOperator: TagSearchOperator | null = request.query.tagSearchOperator ? convertStringToTagSearchOperatorEnum(request.query.tagSearchOperator as string) : null;
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
     specifyDateRange,
     startDate,
@@ -54,6 +55,7 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
     tagSelector,
     specifySearchWithTags,
     tagIds,
+    tagSearchOperator,
   );
   response.json(mediaItems);
 };
