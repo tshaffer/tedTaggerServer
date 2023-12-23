@@ -39,21 +39,22 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
   console.log('getMediaItemsToDisplay');
+  
   const specifyDateRange: boolean = JSON.parse(request.query.specifyDateRange as string);
   const startDate: string | null = request.query.startDate ? request.query.startDate as string : null;
   const endDate: string | null = request.query.endDate ? request.query.endDate as string : null;
-  const specifyTagExistence: boolean = JSON.parse(request.query.specifyTagExistence as string);
-  const tagSelector: TagSelectorType | null = request.query.tagSelector ? convertStringToTagSelectorEnum(request.query.tagSelector as string) : null;
-  const specifySearchWithTags: boolean = JSON.parse(request.query.specifySearchWithTags as string);
-  const tagIds: string[] = request.query.tagIds ? (request.query.tagIds as string).split(',') : [];
-  const tagSearchOperator: TagSearchOperator | null = request.query.tagSearchOperator ? convertStringToTagSearchOperatorEnum(request.query.tagSearchOperator as string) : null;
+  
+  const specifyTagsInSearch: boolean= JSON.parse(request.query.specifyTagsInSearch as string);
+  const tagSelector: TagSelectorType = convertStringToTagSelectorEnum(request.query.tagSelector as string);
+  const tagIds: string[] = (request.query.tagIds as string).split(',');
+  const tagSearchOperator: TagSearchOperator = convertStringToTagSearchOperatorEnum(request.query.tagSearchOperator as string);
+
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDb(
     specifyDateRange,
     startDate,
     endDate,
-    specifyTagExistence,
+    specifyTagsInSearch,
     tagSelector,
-    specifySearchWithTags,
     tagIds,
     tagSearchOperator,
   );

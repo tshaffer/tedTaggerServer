@@ -35,9 +35,8 @@ export const getMediaItemsToDisplayFromDb = async (
   specifyDateRange: boolean,
   startDate: string | null,
   endDate: string | null,
-  specifyTagExistence: boolean,
+  specifyTagsInSearch: boolean,
   tagSelector: TagSelectorType | null,
-  specifySearchWithTags: boolean = false,
   tagIds: string[] = [],
   tagSearchOperator: TagSearchOperator | null,
 ): Promise<MediaItem[]> => {
@@ -47,7 +46,7 @@ export const getMediaItemsToDisplayFromDb = async (
   if (specifyDateRange) {
     querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
   }
-  if (specifyTagExistence) {
+  if (specifyTagsInSearch) {
     switch (tagSelector) {
       case TagSelectorType.Untagged:
         querySpec = { ...querySpec, tagIds: { $size: 0 } };
@@ -55,16 +54,19 @@ export const getMediaItemsToDisplayFromDb = async (
       case TagSelectorType.Tagged:
         querySpec = { ...querySpec, tagIds: { $size: { $gt: 0 } } };
         break;
+      case TagSelectorType.TagList: {
+        if (tagIds.length > 0) {
+          const tagSearchOperatorValue: string = isNil(tagSearchOperator) ? TagSearchOperator.OR : tagSearchOperator;
+          if (tagSearchOperatorValue === TagSearchOperator.AND) {
+            querySpec = { ...querySpec, tagIds: { $all: tagIds } };
+          } else {
+            querySpec = { ...querySpec, tagIds: { $in: tagIds } };
+          }
+        }
+        break;
+      }
       default:
         break;
-    }
-  }
-  if (specifySearchWithTags && tagIds.length > 0) {
-    const tagSearchOperatorValue: string = isNil(tagSearchOperator) ? TagSearchOperator.OR : tagSearchOperator;
-    if (tagSearchOperatorValue === TagSearchOperator.AND) {
-      querySpec = { ...querySpec, tagIds: { $all: tagIds } };
-    } else {
-      querySpec = { ...querySpec, tagIds: { $in: tagIds } };
     }
   }
 
