@@ -20,7 +20,8 @@ import {
   createUserTagAvatarDocument,
   updateDbTagLabel,
   setDateRangeSpecificationDb,
-  setTagExistenceSpecificationDb
+  setTagExistenceSpecificationDb,
+  deleteTagFromDb
 } from './dbInterface';
 import { AppTagAvatar, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
@@ -81,6 +82,12 @@ export const addTag = async (request: Request, response: Response, next: any) =>
   };
   await createTagDocument(tag);
 
+  response.sendStatus(200);
+}
+
+export const deleteTag = async (request: Request, response: Response, next: any) => {
+  const { tagId } = request.body;
+  await deleteTagFromDb(tagId);
   response.sendStatus(200);
 }
 

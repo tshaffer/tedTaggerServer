@@ -116,6 +116,13 @@ export const createTagDocument = async (tag: Tag): Promise<Document | void> => {
     });
 };
 
+export const deleteTagFromDb = async (tagId: string): Promise<any> => {
+  const tagModel = getTagModel();
+  const filter = { id: tagId };
+  await tagModel.deleteOne(filter);
+}
+
+
 // https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
 export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
 

@@ -27,6 +27,7 @@ import {
   setDateRangeSpecification,
   setTagExistenceSpecification,
   setTagsSpecification,
+  deleteTag,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -56,6 +57,7 @@ export class Routes {
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
 
     app.post('/api/v1/addTag', addTag)
+    app.post('/api/v1/deleteTag', deleteTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems)
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
