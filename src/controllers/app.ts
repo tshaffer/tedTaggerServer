@@ -23,9 +23,10 @@ import {
   setTagExistenceSpecificationDb,
   deleteTagFromDb,
   getAllKeywordDataFromDb,
-  createKeywordDocument
+  createKeywordDocument,
+  createKeywordNodeDocument
 } from './dbInterface';
-import { AppTagAvatar, Keyword, KeywordData, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
+import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
@@ -263,10 +264,16 @@ export const getAllKeywordData = async (request: Request, response: Response, ne
 };
 
 export const addKeyword = async (request: Request, response: Response, next: any) => {
-
   const { keywordId, label, type } = request.body;
   const keyword: Keyword = { keywordId, label, type };
   const keywordIdFromDb: string = await createKeywordDocument(keyword);
   response.json(keywordIdFromDb);
+}
+
+export const addKeywordNode = async (request: Request, response: Response, next: any) => {
+  const { nodeId, keywordId, parentNodeId, childrenNodeIds } = request.body;
+  const keywordNode: KeywordNode = { nodeId, keywordId, parentNodeId, childrenNodeIds };
+  const keywordNodeIdFromDb: string = await createKeywordNodeDocument(keywordNode);
+  response.json(keywordNodeIdFromDb);
 }
 

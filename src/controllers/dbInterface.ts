@@ -1,4 +1,4 @@
-import { isArray, isNil } from 'lodash';
+import { isArray, isNil, isString } from 'lodash';
 import {
   getAppTagAvatarModel,
   getKeywordModel,
@@ -495,10 +495,19 @@ export const createKeywordDocument = async (keyword: Keyword): Promise<string> =
   return keywordModel.create(keyword)
     .then((keywordDocument: any) => {
       const keyword: Keyword = keywordDocument.toObject() as Keyword;
-      const keywordId = keyword.keywordId;
-      return Promise.resolve(keywordId);
+      return Promise.resolve(keyword.keywordId);
     }).catch((err: any) => {
       return Promise.reject(err);
     });
 }
 
+export const createKeywordNodeDocument = async (keywordNode: KeywordNode): Promise<string> => {
+  const keywordNodeModel = getKeywordNodeModel();
+  return keywordNodeModel.create(keywordNode)
+    .then((keywordNodeDocument: any) => {
+      const keywordNode: KeywordNode = keywordNodeDocument.toObject() as KeywordNode;
+      return Promise.resolve(keywordNode.nodeId);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}

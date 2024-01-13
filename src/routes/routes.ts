@@ -30,6 +30,7 @@ import {
   deleteTag,
   getAllKeywordData,
   addKeyword,
+  addKeywordNode,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -65,6 +66,7 @@ export class Routes {
     app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems)
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
     app.post('/api/v1/addKeyword', addKeyword)
+    app.post('/api/v1/addKeywordNode', addKeywordNode)
 
     app.post('/api/v1/addUserAvatar', addUserAvatar)
     app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);

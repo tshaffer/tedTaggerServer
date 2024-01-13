@@ -95,8 +95,8 @@ export interface Keyword {
 export interface KeywordNode {
   nodeId: string;
   keywordId: string;
-  parentNodeId?: string;
-  childrenNodeIds?: string[];
+  parentNodeId: string;
+  childrenNodeIds: string[];
 }
 
 export interface KeywordData {
