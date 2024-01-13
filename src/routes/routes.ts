@@ -58,7 +58,7 @@ export class Routes {
     app.get('/api/v1/defaultAvatarId', getDefaultAvatarId);
     app.get('/api/v1/appTagAvatars', getAppTagAvatars);
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
-    app.get('/app/v1/getAllKeywordData', getAllKeywordData);
+    app.get('/api/v1/allKeywordData', getAllKeywordData);
     
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/deleteTag', deleteTag)

@@ -473,7 +473,7 @@ export const getKeywordRootNodeIdFromDb = async (): Promise<string> => {
   } else if (keywordTreeNodeDocuments.length > 1) {
     debugger;
   } else {
-    return keywordTreeNodeDocuments[0].nodeId.toString();
+    return keywordTreeNodeDocuments[0].toObject().rootNodeId;
   }
 }
 

@@ -259,7 +259,18 @@ export const addUserAvatar = async (request: Request, response: Response, next: 
   response.json(avatarId);
 }
 
+/*
+export const getVersion = (request: Request, response: Response, next: any) => {
+  console.log('getVersion');
+  const data: any = {
+    serverVersion: version,
+  };
+  response.json(data);
+};
+
+*/
 export const getAllKeywordData = async (request: Request, response: Response, next: any) => {
+  console.log('getAllKeywordData');
   const keywordData: KeywordData = await getAllKeywordDataFromDb();
   response.json(keywordData);
 };
