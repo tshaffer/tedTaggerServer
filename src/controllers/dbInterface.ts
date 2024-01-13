@@ -1,6 +1,9 @@
 import { isArray, isNil } from 'lodash';
 import {
   getAppTagAvatarModel,
+  getKeywordModel,
+  getKeywordNodeModel,
+  getKeywordTreeModel,
   getMediaitemModel,
   getTagModel,
   getUserTagAvatarModel,
@@ -13,6 +16,8 @@ import {
   PhotosToDisplaySpec,
   TagSelectorType,
   TagSearchOperator,
+  Keyword,
+  KeywordNode,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
@@ -433,5 +438,67 @@ export const getAllUserTagAvatarsFromDb = async (): Promise<UserTagAvatar[]> => 
   return userTagAvatars;
 }
 
+export const getKeywordsFromDb = async (): Promise<Keyword[]> => {
+  const keywordModel = getKeywordModel();
+  const keywords: Keyword[] = [];
+  const keywordDocuments: any = await (keywordModel as any).find().exec();
+  for (const document of keywordDocuments) {
+    const keyword: Keyword = document.toObject() as Keyword;
+    keyword.keywordId = document.keywordId.toString();
+    keyword.label = document.label.toString();
+    keyword.type = document.type.toString();
+    keywords.push(keyword);
+  }
+  return keywords;
+}
 
+export const getKeywordNodesFromDb = async (): Promise<KeywordNode[]> => {
+  const keywordNodeModel = getKeywordNodeModel();
+  const keywordNodes: KeywordNode[] = [];
+  const keywordNodeDocuments: any = await (keywordNodeModel as any).find().exec();
+  for (const document of keywordNodeDocuments) {
+    const keywordNode: KeywordNode = document.toObject() as KeywordNode;
+    keywordNode.nodeId = document.nodeId.toString();
+    keywordNode.keywordId = document.keywordId.toString();
+    keywordNodes.push(keywordNode);
+  }
+  return keywordNodes;
+}
+
+export const getKeywordRootNodeIdFromDb = async (): Promise<string> => {
+  const keywordTreeNodeModel = getKeywordTreeModel();
+  const keywordTreeNodeDocuments: any = await (keywordTreeNodeModel as any).find().exec();
+  if (keywordTreeNodeDocuments.length === 0) {
+    return '';
+  } else if (keywordTreeNodeDocuments.length > 1) {
+    debugger;
+  } else {
+    return keywordTreeNodeDocuments[0].nodeId.toString();
+  }
+}
+
+export const getAllKeywordDataFromDb = async (): Promise<any> => {
+
+  const keywords: Keyword[] = await getKeywordsFromDb();
+  const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
+  const keywordRootNodeId: string = await getKeywordRootNodeIdFromDb();
+
+  return {
+    keywords,
+    keywordNodes,
+    keywordRootNodeId,
+  };
+}
+
+export const createKeywordDocument = async (keyword: Keyword): Promise<string> => {
+  const keywordModel = getKeywordModel();
+  return keywordModel.create(keyword)
+    .then((keywordDocument: any) => {
+      const keyword: Keyword = keywordDocument.toObject() as Keyword;
+      const keywordId = keyword.keywordId;
+      return Promise.resolve(keywordId);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}
 

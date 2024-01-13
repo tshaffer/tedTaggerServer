@@ -28,6 +28,8 @@ import {
   setTagExistenceSpecification,
   setTagsSpecification,
   deleteTag,
+  getAllKeywordData,
+  addKeyword,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -55,12 +57,14 @@ export class Routes {
     app.get('/api/v1/defaultAvatarId', getDefaultAvatarId);
     app.get('/api/v1/appTagAvatars', getAppTagAvatars);
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
-
+    app.get('/app/v1/getAllKeywordData', getAllKeywordData);
+    
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/deleteTag', deleteTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems)
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
+    app.post('/api/v1/addKeyword', addKeyword)
 
     app.post('/api/v1/addUserAvatar', addUserAvatar)
     app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);

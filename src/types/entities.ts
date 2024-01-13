@@ -85,3 +85,22 @@ export interface UserTagAvatar {
   label: string;
   path: string;
 }
+
+export interface Keyword {
+  keywordId: string;
+  label: string;
+  type: string;
+}
+
+export interface KeywordNode {
+  nodeId: string;
+  keywordId: string;
+  parentNodeId?: string;
+  childrenNodeIds?: string[];
+}
+
+export interface KeywordData {
+  keywords: Keyword[];
+  keywordNodes: KeywordNode[];
+  keywordRootNodeId: string;
+}

@@ -21,9 +21,11 @@ import {
   updateDbTagLabel,
   setDateRangeSpecificationDb,
   setTagExistenceSpecificationDb,
-  deleteTagFromDb
+  deleteTagFromDb,
+  getAllKeywordDataFromDb,
+  createKeywordDocument
 } from './dbInterface';
-import { AppTagAvatar, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
+import { AppTagAvatar, Keyword, KeywordData, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
@@ -253,5 +255,18 @@ export const addUserAvatar = async (request: Request, response: Response, next: 
   const userTagAvatar: UserTagAvatar = { id, label, path };
   const avatarId: string = await createUserTagAvatarDocument(userTagAvatar);
   response.json(avatarId);
+}
+
+export const getAllKeywordData = async (request: Request, response: Response, next: any) => {
+  const keywordData: KeywordData = await getAllKeywordDataFromDb();
+  response.json(keywordData);
+};
+
+export const addKeyword = async (request: Request, response: Response, next: any) => {
+
+  const { keywordId, label, type } = request.body;
+  const keyword: Keyword = { keywordId, label, type };
+  const keywordIdFromDb: string = await createKeywordDocument(keyword);
+  response.json(keywordIdFromDb);
 }
 
