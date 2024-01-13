@@ -24,7 +24,8 @@ import {
   deleteTagFromDb,
   getAllKeywordDataFromDb,
   createKeywordDocument,
-  createKeywordNodeDocument
+  createKeywordNodeDocument,
+  setRootKeywordNodeDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
@@ -275,5 +276,11 @@ export const addKeywordNode = async (request: Request, response: Response, next:
   const keywordNode: KeywordNode = { nodeId, keywordId, parentNodeId, childrenNodeIds };
   const keywordNodeIdFromDb: string = await createKeywordNodeDocument(keywordNode);
   response.json(keywordNodeIdFromDb);
+}
+
+export const setRootKeywordNode = async (request: Request, response: Response, next: any) => {
+  const { rootNodeId } = request.body;
+  await setRootKeywordNodeDb(rootNodeId);
+  return response.status(200).send();
 }
 

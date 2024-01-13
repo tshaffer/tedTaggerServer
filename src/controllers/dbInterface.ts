@@ -511,3 +511,13 @@ export const createKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
       return Promise.reject(err);
     });
 }
+
+export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> => {
+  const keywordTreeModel = getKeywordTreeModel();
+  return keywordTreeModel.create( {rootNodeId })
+    .then((keywordTreeDocument: any) => {
+      return Promise.resolve();
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}

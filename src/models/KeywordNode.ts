@@ -3,6 +3,8 @@ import { connection } from '../config';
 
 const Schema = mongoose.Schema;
 
+mongoose.Schema.Types.String.checkRequired(v => typeof v === 'string');
+
 const KeywordNodeSchema = new Schema(
   {
     nodeId: { type: String, required: true, unique: true },
@@ -11,8 +13,6 @@ const KeywordNodeSchema = new Schema(
     childrenNodeIds: [String],
   }
 );
-
-mongoose.Schema.Types.String.checkRequired(v => typeof v === 'string');
 
 export const getKeywordNodeModel = () => {
   const keywordNodeModel = connection.model('keywordnode', KeywordNodeSchema);
