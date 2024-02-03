@@ -18,6 +18,7 @@ import {
   TagSearchOperator,
   Keyword,
   KeywordNode,
+  SearchSpec,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
@@ -88,6 +89,14 @@ export const getMediaItemsToDisplayFromDb = async (
     mediaItems.push(mediaItem);
   }
   return mediaItems;
+}
+
+export const getMediaItemsToDisplayFromDbUsingSearchSpec = async (
+  searchSpec: SearchSpec,
+): Promise<MediaItem[]> => {
+  console.log('getMediaItemsToDisplayFromDbUsingSearchSpec');
+  console.log(searchSpec);
+  return [];
 }
 
 export const getAllTagsFromDb = async (): Promise<Tag[]> => {
@@ -514,7 +523,7 @@ export const createKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
 
 export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> => {
   const keywordTreeModel = getKeywordTreeModel();
-  return keywordTreeModel.create( {rootNodeId })
+  return keywordTreeModel.create({ rootNodeId })
     .then((keywordTreeDocument: any) => {
       return Promise.resolve();
     }).catch((err: any) => {

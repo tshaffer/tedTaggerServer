@@ -1,3 +1,5 @@
+import { SearchRuleType, DateSearchRuleType, KeywordSearchRuleType, MatchRule } from "enums";
+
 export interface GeoData {
   latitude: number;
   longitude: number;
@@ -104,3 +106,25 @@ export interface KeywordData {
   keywordNodes: KeywordNode[];
   keywordRootNodeId: string;
 }
+
+export interface SearchRule {
+  searchRuleType: SearchRuleType;
+  searchRule: KeywordSearchRule | DateSearchRule;
+}
+
+export interface DateSearchRule {
+  dateSearchRuleType: DateSearchRuleType;
+  date: string;
+  date2?: string;
+}
+
+export interface KeywordSearchRule {
+  keywordSearchRuleType: KeywordSearchRuleType;
+  keywordNodeId?: string;
+}
+
+export interface SearchSpec {
+  matchRule: MatchRule;
+  searchRules: SearchRule[];
+}
+

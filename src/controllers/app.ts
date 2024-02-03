@@ -25,14 +25,16 @@ import {
   getAllKeywordDataFromDb,
   createKeywordDocument,
   createKeywordNodeDocument,
-  setRootKeywordNodeDb
+  setRootKeywordNodeDb,
+  getMediaItemsToDisplayFromDbUsingSearchSpec
 } from './dbInterface';
-import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
+import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
   convertStringToTagSelectorEnum
 } from '../utilities';
+import { MatchRule } from 'enums';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -74,13 +76,19 @@ export const getMediaItemsToDisplayFromSearchSpec = async (request: Request, res
     path += '&searchRules=' + JSON.stringify(searchRules);
   */
 
-  const matchRule: string = request.query.matchRule as string;
-  const searchRules: string = JSON.parse(request.query.searchRules as string);
+  const matchRule: MatchRule = request.query.matchRule as MatchRule;
+  const searchRules: SearchRule[] = JSON.parse(request.query.searchRules as string) as SearchRule[];
 
+  const searchSpec: SearchSpec = {
+    matchRule,
+    searchRules,
+  };
+  
+  const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDbUsingSearchSpec(searchSpec);
   console.log('matchRule: ', matchRule);
   console.log('searchRules: ', searchRules);
 
-  response.json([]);
+  response.json(mediaItems);
 };
 
 export const getTags = async (request: Request, response: Response, next: any) => {
