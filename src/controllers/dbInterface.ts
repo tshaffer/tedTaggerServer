@@ -1,4 +1,4 @@
-import { isArray, isNil, isString } from 'lodash';
+import { isArray, isEmpty, isNil, isString } from 'lodash';
 import {
   getAppTagAvatarModel,
   getKeywordModel,
@@ -19,9 +19,13 @@ import {
   Keyword,
   KeywordNode,
   SearchSpec,
+  SearchRule,
+  KeywordSearchRule,
+  DateSearchRule,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
+import { DateSearchRuleType, KeywordSearchRuleType, MatchRule, SearchRuleType } from 'enums';
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -96,7 +100,76 @@ export const getMediaItemsToDisplayFromDbUsingSearchSpec = async (
 ): Promise<MediaItem[]> => {
   console.log('getMediaItemsToDisplayFromDbUsingSearchSpec');
   console.log(searchSpec);
-  return [];
+
+  const { matchRule, searchRules } = searchSpec;
+
+  let querySpec = {};
+  let dateQuerySpec = {};
+  const keywordNodeIds: string[] = [];
+
+  searchRules.forEach((searchRule: SearchRule) => {
+    if (searchRule.searchRuleType === SearchRuleType.Date) {
+      // only support single Date rule for now
+      const dateSearchRule: DateSearchRule = searchRule.searchRule as DateSearchRule;
+      switch (dateSearchRule.dateSearchRuleType) {
+        case DateSearchRuleType.IsInTheRange:
+          const startDate = dateSearchRule.date;
+          const endDate = dateSearchRule.date2;
+          dateQuerySpec = { creationTime: { $gte: startDate, $lte: endDate } };
+          break;
+        case DateSearchRuleType.IsBefore:
+          dateQuerySpec = { creationTime: { $lt: dateSearchRule.date } };
+          break;
+        case DateSearchRuleType.IsAfter:
+          dateQuerySpec = { creationTime: { $gt: dateSearchRule.date } };
+          break;
+        default:
+          throw new Error('dateSearchRuleType not recognized');
+      }
+    } else if (searchRule.searchRuleType === SearchRuleType.Keyword) {
+      const keywordSearchRule: KeywordSearchRule = searchRule.searchRule as KeywordSearchRule;
+      // only support KeywordSearchRuleType.Contains for now
+      if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.Contains) {
+        // keywordQuerySpec = { tagIds: { $in: [keywordSearchRule.keywordNodeId] } };
+        keywordNodeIds.push(keywordSearchRule.keywordNodeId);
+      } else if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.AreEmpty) {
+        // keywordQuerySpec = { tagIds: { $size: 0 } };
+        throw new Error('KeywordSearchRuleType.AreEmpty not supported');
+      } else if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.AreNotEmpty) {
+        // keywordQuerySpec = { tagIds: { $size: { $gt: 0 } } };
+        throw new Error('KeywordSearchRuleType.AreNotEmpty not supported');
+      } else {
+        throw new Error('keywordSearchRuleType not recognized');
+      }
+    } else {
+      throw new Error('searchRuleType not recognized');
+    }
+  });
+
+  if (!isEmpty(dateQuerySpec)) {
+    querySpec = dateQuerySpec;
+  }
+  if (keywordNodeIds.length > 0) {
+    if (matchRule === MatchRule.all) {
+      querySpec = { ...querySpec, keywordNodeIds: { $all: keywordNodeIds } };
+    } else {
+      querySpec = { ...querySpec, keywordNodeIds: { $in: keywordNodeIds } };
+    }
+  }
+
+  console.log('getMediaItemsToDisplayFromDb querySpec: ', querySpec);
+
+  const mediaItemModel = getMediaitemModel();
+
+  const query = mediaItemModel.find(querySpec);
+  const documents: any = await query.exec();
+  const mediaItems: MediaItem[] = [];
+  for (const document of documents) {
+    const mediaItem: MediaItem = document.toObject() as MediaItem;
+    mediaItem.googleId = document.googleId.toString();
+    mediaItems.push(mediaItem);
+  }
+  return mediaItems;
 }
 
 export const getAllTagsFromDb = async (): Promise<Tag[]> => {
