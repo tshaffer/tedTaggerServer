@@ -31,6 +31,7 @@ import {
   addKeyword,
   addKeywordNode,
   setRootKeywordNode,
+  getMediaItemsToDisplayFromSearchSpec,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -53,6 +54,7 @@ export class Routes {
     app.get('/api/v1/addAppAvatars', addAppAvatars)
     app.get('/api/v1/createPhotosToDisplaySpec', createPhotosToDisplaySpec)
     app.get('/api/v1/mediaItemsToDisplay', getMediaItemsToDisplay);
+    app.get('/api/v1/mediaItemsToDisplayFromSearchSpec', getMediaItemsToDisplayFromSearchSpec);
     app.get('/api/v1/tags', getTags);
     app.get('/api/v1/photosToDisplaySpec', getPhotosToDisplaySpec);
     app.get('/api/v1/defaultAvatarId', getDefaultAvatarId);

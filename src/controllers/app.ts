@@ -44,12 +44,12 @@ export const getVersion = (request: Request, response: Response, next: any) => {
 
 export const getMediaItemsToDisplay = async (request: Request, response: Response) => {
   console.log('getMediaItemsToDisplay');
-  
+
   const specifyDateRange: boolean = JSON.parse(request.query.specifyDateRange as string);
   const startDate: string | null = request.query.startDate ? request.query.startDate as string : null;
   const endDate: string | null = request.query.endDate ? request.query.endDate as string : null;
-  
-  const specifyTagsInSearch: boolean= JSON.parse(request.query.specifyTagsInSearch as string);
+
+  const specifyTagsInSearch: boolean = JSON.parse(request.query.specifyTagsInSearch as string);
   const tagSelector: TagSelectorType = convertStringToTagSelectorEnum(request.query.tagSelector as string);
   const tagIds: string[] = (request.query.tagIds as string).split(',');
   const tagSearchOperator: TagSearchOperator = convertStringToTagSearchOperatorEnum(request.query.tagSearchOperator as string);
@@ -64,6 +64,23 @@ export const getMediaItemsToDisplay = async (request: Request, response: Respons
     tagSearchOperator,
   );
   response.json(mediaItems);
+};
+
+export const getMediaItemsToDisplayFromSearchSpec = async (request: Request, response: Response) => {
+  console.log('getMediaItemsToDisplayFromSearchSpec');
+
+  /*
+    path += '?matchRule=' + matchRule;
+    path += '&searchRules=' + JSON.stringify(searchRules);
+  */
+
+  const matchRule: string = request.query.matchRule as string;
+  const searchRules: string = JSON.parse(request.query.searchRules as string);
+
+  console.log('matchRule: ', matchRule);
+  console.log('searchRules: ', searchRules);
+
+  response.json([]);
 };
 
 export const getTags = async (request: Request, response: Response, next: any) => {
