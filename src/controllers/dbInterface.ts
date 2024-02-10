@@ -25,7 +25,7 @@ import {
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
-import { DateSearchRuleType, KeywordSearchRuleType, MatchRule, SearchRuleType } from 'enums';
+import { DateSearchRuleType, KeywordSearchRuleType, MatchRule, SearchRuleType } from '../types/enums';
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -149,6 +149,8 @@ export const getMediaItemsToDisplayFromDbUsingSearchSpec = async (
   if (!isEmpty(dateQuerySpec)) {
     querySpec = dateQuerySpec;
   }
+
+  // TEDTODO - need to take matchRule into account when combining dateQuerySpec and keywordQuerySpec
   if (keywordNodeIds.length > 0) {
     if (matchRule === MatchRule.all) {
       querySpec = { ...querySpec, keywordNodeIds: { $all: keywordNodeIds } };
@@ -547,23 +549,11 @@ export const getKeywordNodesFromDb = async (): Promise<KeywordNode[]> => {
   return keywordNodes;
 }
 
-export const getKeywordRootNodeIdFromDb = async (): Promise<string> => {
-  const keywordTreeNodeModel = getKeywordTreeModel();
-  const keywordTreeNodeDocuments: any = await (keywordTreeNodeModel as any).find().exec();
-  if (keywordTreeNodeDocuments.length === 0) {
-    return '';
-  } else if (keywordTreeNodeDocuments.length > 1) {
-    debugger;
-  } else {
-    return keywordTreeNodeDocuments[0].toObject().rootNodeId;
-  }
-}
-
 export const getAllKeywordDataFromDb = async (): Promise<any> => {
 
   const keywords: Keyword[] = await getKeywordsFromDb();
   const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
-  const keywordRootNodeId: string = await getKeywordRootNodeIdFromDb();
+  const keywordRootNodeId: string = 'rootKeywordNodeId';
 
   return {
     keywords,
