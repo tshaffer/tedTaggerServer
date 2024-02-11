@@ -128,3 +128,10 @@ export interface SearchSpec {
   searchRules: SearchRule[];
 }
 
+export interface Takeout {
+  id: string;
+  label: string;
+  albumName: string;
+  path: string;
+}
+

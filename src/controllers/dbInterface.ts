@@ -22,10 +22,12 @@ import {
   SearchRule,
   KeywordSearchRule,
   DateSearchRule,
+  Takeout,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
 import { DateSearchRuleType, KeywordSearchRuleType, MatchRule, SearchRuleType } from '../types/enums';
+import { getTakeoutModel } from '../models';
 
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
@@ -593,3 +595,15 @@ export const setRootKeywordNodeDb = async (rootNodeId: string): Promise<void> =>
       return Promise.reject(err);
     });
 }
+
+export const createTakeoutDocument = async (takeout: Takeout): Promise<string> => {
+  const takeoutModel = getTakeoutModel();
+  return takeoutModel.create(takeout)
+    .then((takeoutDocument: any) => {
+      const dbTakeout: Takeout = takeoutDocument.toObject() as Takeout;
+      return Promise.resolve(dbTakeout.id);
+    }).catch((err: any) => {
+      return Promise.reject(err);
+    });
+}
+

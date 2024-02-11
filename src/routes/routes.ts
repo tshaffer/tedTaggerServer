@@ -32,6 +32,7 @@ import {
   addKeywordNode,
   setRootKeywordNode,
   getMediaItemsToDisplayFromSearchSpec,
+  addTakeout,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -67,6 +68,7 @@ export class Routes {
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)
     app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems)
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems)
+    
     app.post('/api/v1/addKeyword', addKeyword)
     app.post('/api/v1/addKeywordNode', addKeywordNode)
     app.post('/api/v1/setRootKeywordNode', setRootKeywordNode)
@@ -83,6 +85,8 @@ export class Routes {
     app.post('/api/v1/dateRangeSpecification', setDateRangeSpecification);
     app.post('/api/v1/tagExistenceSpecification', setTagExistenceSpecification);
     app.post('/api/v1/tagsSpecification', setTagsSpecification);
+
+    app.post('/api/v1/addTakeout', addTakeout);
 
   }
 }
