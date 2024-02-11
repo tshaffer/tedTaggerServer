@@ -9,6 +9,7 @@ import {
   TagSelectorType
  } from '../types';
 import { createAppTagAvatarDocument, createPhotosToDisplaySpecDocument } from "../controllers";
+import { isNil } from 'lodash';
 
 export const addAppAvatars = async (request: Request, response: Response, next: any) => {
 
@@ -93,3 +94,14 @@ export function convertStringToTagSearchOperatorEnum(value: string): TagSearchOp
   }
   return undefined;
 }
+
+export const valueOrNull = (possibleValue: any, convertToNumber: boolean = false): any | null => {
+  if (isNil(possibleValue)) {
+    return null;
+  }
+  if (convertToNumber) {
+    possibleValue = parseInt(possibleValue);
+  }
+  return possibleValue;
+}
+

@@ -1,4 +1,5 @@
-import { isArray, isEmpty, isNil, isString } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import { isArray, isEmpty, isNil } from 'lodash';
 import {
   getAppTagAvatarModel,
   getKeywordModel,
@@ -621,4 +622,131 @@ export const getTakeoutsFromDb = async (): Promise<Takeout[]> => {
   }
   return takeouts;
 }
+
+export const getMediaItemsInAlbumFromDb = async (albumId: string): Promise<MediaItem[]> => {
+
+  const mediaItemModel = getMediaitemModel();
+
+  const mediaItems: MediaItem[] = [];
+  const documents: any = await (mediaItemModel as any).find({ albumId }).exec();
+  for (const document of documents) {
+    const mediaItem: MediaItem = document.toObject() as MediaItem;
+    mediaItem.googleId = document.googleId.toString();
+    mediaItems.push(mediaItem);
+  }
+  return mediaItems;
+}
+
+export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promise<any> => {
+  const keywordNodeModel = getKeywordNodeModel();
+  const filter = { nodeId: keywordNode.nodeId };
+  const updatedDoc = await keywordNodeModel.findOneAndUpdate(filter, keywordNode, {
+    new: true,
+  }).exec();
+}
+
+export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<void> => {
+
+  let peopleKeywordNode: KeywordNode = null;
+  const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
+  keywordNodes.forEach((keywordNode: KeywordNode) => {
+    if (keywordNode.nodeId === 'peopleKeywordNodeId') {
+      peopleKeywordNode = keywordNode;
+      return;
+    }
+  });
+  if (isNil(peopleKeywordNode)) {
+    throw new Error('peopleKeywordNode not found');
+  }
+
+  const existingKeywords: Keyword[] = await getKeywordsFromDb();
+  const existingKeywordNames: string[] = existingKeywords.map((aKeyword: Keyword) => {
+    return aKeyword.label;
+  })
+  const existingKeywordsSet: Set<string> = new Set<string>(existingKeywordNames);
+
+  const keywordsToAddToDb: Keyword[] = [];
+
+  for (let keywordLabel of keywordsSet) {
+    if (!existingKeywordsSet.has(keywordLabel)) {
+      const keyword: Keyword = {
+        keywordId: uuidv4(),
+        label: keywordLabel,
+        type: 'autoPerson',
+      };
+      keywordsToAddToDb.push(keyword);
+    }
+  }
+
+  if (keywordsToAddToDb.length > 0) {
+    const keywordModel = getKeywordModel();
+    try {
+      return keywordModel.collection.insertMany(keywordsToAddToDb)
+        .then((retVal: any) => {
+          console.log('keywords added successfully');
+          console.log(retVal);
+
+          const createKeywordNodePromises: Promise<string>[] = [];
+
+          const keywords: Keyword[] = retVal.ops;
+          keywords.forEach((keyword: Keyword) => {
+            const keywordNode: KeywordNode = {
+              nodeId: uuidv4(),
+              keywordId: keyword.keywordId,
+              parentNodeId: 'peopleKeywordNodeId',
+              childrenNodeIds: [],
+            };
+            createKeywordNodePromises.push(createKeywordNodeDocument(keywordNode));
+          });
+          Promise.all(createKeywordNodePromises)
+            .then((keywordNodeIds: string[]) => {
+
+              console.log(keywordNodeIds);
+
+              keywordNodeIds.forEach((keywordNodeId: string) => {
+                peopleKeywordNode.childrenNodeIds.push(keywordNodeId);
+              });
+              updateKeywordNodeDocument(peopleKeywordNode);
+
+              return;
+            });
+        })
+        .catch((error: any) => {
+          console.log('db add error: ', error);
+          debugger;
+          // if (error.code === 11000) {
+          //   return;
+          // } else {
+          //   debugger;
+          // }
+        });
+    } catch (error: any) {
+      debugger;
+    }
+  }
+}
+
+export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {
+
+  const mediaItemModel = getMediaitemModel();
+
+  try {
+    return mediaItemModel.collection.insertOne(mediaItem)
+      .then((retVal: any) => {
+        const dbRecordId: string = retVal.insertedId._id.toString();
+        return;
+      })
+      .catch((error: any) => {
+        console.log('db add error: ', error);
+        if (error.code === 11000) {
+          return;
+        } else {
+          debugger;
+        }
+      });
+  } catch (error: any) {
+    debugger;
+  }
+};
+
 
