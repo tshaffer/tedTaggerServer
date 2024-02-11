@@ -28,15 +28,17 @@ import {
   setRootKeywordNodeDb,
   getMediaItemsToDisplayFromDbUsingSearchSpec,
   createTakeoutDocument,
-  getTakeoutsFromDb
+  getTakeoutsFromDb,
+  getTakeoutById
 } from './dbInterface';
-import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
+import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
   convertStringToTagSelectorEnum
 } from '../utilities';
 import { MatchRule } from 'enums';
+import { importFromTakeout } from './takeouts';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -332,5 +334,12 @@ export const addTakeout = async (request: Request, response: Response, next: any
   const { id, label, albumName, path } = request.body;
   const takeoutIdFromDb: string = await createTakeoutDocument({ id, label, albumName, path});
   response.json(takeoutIdFromDb);
+}
+
+export const importFromTakeoutEndpoint = async (request: Request, response: Response, next: any) => {
+  const { id } = request.body;
+  const takeout: Takeout = await getTakeoutById(id);
+  await importFromTakeout(takeout.albumName, takeout.path);
+  return response.status(200).send();
 }
 

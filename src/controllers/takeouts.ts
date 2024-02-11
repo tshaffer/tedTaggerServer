@@ -21,9 +21,9 @@ const getAlbumItems = async (authService: AuthService, albumId: string): Promise
 //  input parameters
 //    albumName - corresponding to takeout file
 //    takeoutFolder - folder containing metadata for the files retrieved from a single takeout
-export const mergeFromTakeout = async (albumName: string, takeoutFolder: string) => {
+export const importFromTakeout = async (albumName: string, takeoutFolder: string) => {
 
-  console.log('mergeFromTakeout');
+  console.log('importFromTakeout');
 
   // Step 0
   // connect to db; acquire authService
@@ -65,6 +65,9 @@ export const mergeFromTakeout = async (albumName: string, takeoutFolder: string)
 const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string) => {
 
   // retrieve metadata files and image files from takeout folder
+  takeoutFolder = path.join('public/takeouts', takeoutFolder);
+  console.log('takeoutFolder', takeoutFolder);
+  
   const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
   const takeoutImageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
 

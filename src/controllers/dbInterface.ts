@@ -623,6 +623,22 @@ export const getTakeoutsFromDb = async (): Promise<Takeout[]> => {
   return takeouts;
 }
 
+export const getTakeoutById = async (takeoutId: string): Promise<Takeout> => {
+
+  const takeoutModel = getTakeoutModel();
+
+  const filter = { id: takeoutId };
+  const takeoutDocument: Document = await takeoutModel.findOne(filter);
+
+  if (!isNil(takeoutDocument)) {
+    const takeout: Takeout = takeoutDocument.toObject() as Takeout;
+    return takeout;
+  }
+  return null;
+}
+
+
+
 export const getMediaItemsInAlbumFromDb = async (albumId: string): Promise<MediaItem[]> => {
 
   const mediaItemModel = getMediaitemModel();

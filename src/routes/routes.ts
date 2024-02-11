@@ -34,6 +34,7 @@ import {
   getMediaItemsToDisplayFromSearchSpec,
   addTakeout,
   getTakeouts,
+  importFromTakeoutEndpoint,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -89,6 +90,6 @@ export class Routes {
     app.post('/api/v1/tagsSpecification', setTagsSpecification);
 
     app.post('/api/v1/addTakeout', addTakeout);
-
+    app.post('/api/v1/importFromTakeout', importFromTakeoutEndpoint);
   }
 }
