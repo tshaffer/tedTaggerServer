@@ -607,3 +607,18 @@ export const createTakeoutDocument = async (takeout: Takeout): Promise<string> =
     });
 }
 
+export const getTakeoutsFromDb = async (): Promise<Takeout[]> => {
+  const takeoutModel = getTakeoutModel();
+  const takeouts: Takeout[] = [];
+  const takeoutDocuments: any = await (takeoutModel as any).find().exec();
+  for (const document of takeoutDocuments) {
+    const takeout: Takeout = document.toObject() as Takeout;
+    takeout.id = document.id.toString();
+    takeout.label = document.label.toString();
+    takeout.albumName = document.albumName.toString();
+    takeout.path = document.path.toString();
+    takeouts.push(takeout);
+  }
+  return takeouts;
+}
+

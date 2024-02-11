@@ -33,6 +33,7 @@ import {
   setRootKeywordNode,
   getMediaItemsToDisplayFromSearchSpec,
   addTakeout,
+  getTakeouts,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -62,7 +63,8 @@ export class Routes {
     app.get('/api/v1/appTagAvatars', getAppTagAvatars);
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
     app.get('/api/v1/allKeywordData', getAllKeywordData);
-    
+    app.get('/api/v1/takeouts', getTakeouts);
+
     app.post('/api/v1/addTag', addTag)
     app.post('/api/v1/deleteTag', deleteTag)
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems)

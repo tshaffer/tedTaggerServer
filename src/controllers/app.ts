@@ -27,7 +27,8 @@ import {
   createKeywordNodeDocument,
   setRootKeywordNodeDb,
   getMediaItemsToDisplayFromDbUsingSearchSpec,
-  createTakeoutDocument
+  createTakeoutDocument,
+  getTakeoutsFromDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, UserTagAvatar } from '../types';
 import multer from 'multer';
@@ -320,6 +321,12 @@ export const setRootKeywordNode = async (request: Request, response: Response, n
   await setRootKeywordNodeDb(rootNodeId);
   return response.status(200).send();
 }
+
+export const getTakeouts = async (request: Request, response: Response, next: any) => {
+  console.log('getTakeouts');
+  const takeouts: any = await getTakeoutsFromDb();
+  response.json(takeouts);
+};
 
 export const addTakeout = async (request: Request, response: Response, next: any) => {
   const { id, label, albumName, path } = request.body;
