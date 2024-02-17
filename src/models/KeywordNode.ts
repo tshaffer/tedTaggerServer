@@ -9,7 +9,7 @@ const KeywordNodeSchema = new Schema(
   {
     nodeId: { type: String, required: true, unique: true },
     keywordId: { type: String, required: true, unique: true },
-    parentNodeId: { type: String, required: true, unique: true },
+    parentNodeId: { type: String, required: true },
     childrenNodeIds: [String],
   }
 );

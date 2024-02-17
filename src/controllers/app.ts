@@ -29,7 +29,8 @@ import {
   getMediaItemsToDisplayFromDbUsingSearchSpec,
   createTakeoutDocument,
   getTakeoutsFromDb,
-  getTakeoutById
+  getTakeoutById,
+  updateKeywordNodeDocument
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar } from '../types';
 import multer from 'multer';
@@ -87,7 +88,7 @@ export const getMediaItemsToDisplayFromSearchSpec = async (request: Request, res
     matchRule,
     searchRules,
   };
-  
+
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDbUsingSearchSpec(searchSpec);
   console.log('matchRule: ', matchRule);
   console.log('searchRules: ', searchRules);
@@ -318,6 +319,44 @@ export const addKeywordNode = async (request: Request, response: Response, next:
   response.json(keywordNodeIdFromDb);
 }
 
+export const initializeKeywordTree = async (request: Request, response: Response, next: any) => {
+  
+  const rootKeyword: Keyword = { 
+    keywordId: 'rootKeywordId', 
+    label: 'All', 
+    type: 'tbd' 
+  };
+  const rootKeywordId: string = await createKeywordDocument(rootKeyword);
+
+  const rootKeywordNode: KeywordNode = {
+    nodeId: 'rootKeywordNodeId',
+    keywordId: rootKeywordId,
+    parentNodeId: '',
+    childrenNodeIds: []
+  };
+  const rootKeywordNodeIdFromDb: string = await createKeywordNodeDocument(rootKeywordNode);
+
+  const peopleKeyword: Keyword = { 
+    keywordId: 'peopleKeywordId', 
+    label: 'People', 
+    type: 'tbd' 
+  };
+  const peopleKeywordId: string = await createKeywordDocument(peopleKeyword);
+
+  const peopleKeywordNode: KeywordNode = {
+    nodeId: 'peopleKeywordNodeId',
+    keywordId: peopleKeywordId,
+    parentNodeId: rootKeywordNode.nodeId,
+    childrenNodeIds: []
+  };
+  const peopleKeywordNodeIdFromDb: string = await createKeywordNodeDocument(peopleKeywordNode);
+
+  rootKeywordNode.childrenNodeIds.push(peopleKeywordNode.nodeId);
+  await updateKeywordNodeDocument(rootKeywordNode);
+
+  return response.status(200).send();
+}
+
 export const setRootKeywordNode = async (request: Request, response: Response, next: any) => {
   const { rootNodeId } = request.body;
   await setRootKeywordNodeDb(rootNodeId);
@@ -332,7 +371,7 @@ export const getTakeouts = async (request: Request, response: Response, next: an
 
 export const addTakeout = async (request: Request, response: Response, next: any) => {
   const { id, label, albumName, path } = request.body;
-  const takeoutIdFromDb: string = await createTakeoutDocument({ id, label, albumName, path});
+  const takeoutIdFromDb: string = await createTakeoutDocument({ id, label, albumName, path });
   response.json(takeoutIdFromDb);
 }
 

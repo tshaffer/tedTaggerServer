@@ -35,6 +35,7 @@ import {
   addTakeout,
   getTakeouts,
   importFromTakeoutEndpoint,
+  initializeKeywordTree,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -75,6 +76,7 @@ export class Routes {
     app.post('/api/v1/addKeyword', addKeyword)
     app.post('/api/v1/addKeywordNode', addKeywordNode)
     app.post('/api/v1/setRootKeywordNode', setRootKeywordNode)
+    app.post('/api/v1/initializeKeywordTree', initializeKeywordTree)
 
     app.post('/api/v1/addUserAvatar', addUserAvatar)
     app.post('/api/v1/uploadUserAvatarFile', uploadUserAvatarFile);
