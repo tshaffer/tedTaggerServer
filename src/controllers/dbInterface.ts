@@ -24,6 +24,7 @@ import {
   KeywordSearchRule,
   DateSearchRule,
   Takeout,
+  KeywordData,
 } from '../types';
 import { Document } from 'mongoose';
 import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
@@ -661,7 +662,7 @@ export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promi
   }).exec();
 }
 
-export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<void> => {
+export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<KeywordData> => {
 
   let peopleKeywordNode: KeywordNode = null;
   const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
@@ -682,6 +683,7 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
   const existingKeywordsSet: Set<string> = new Set<string>(existingKeywordNames);
 
   const keywordsToAddToDb: Keyword[] = [];
+  const addedKeywordNodes: KeywordNode[] = [];
 
   for (let keywordLabel of keywordsSet) {
     if (!existingKeywordsSet.has(keywordLabel)) {
@@ -713,8 +715,9 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
               childrenNodeIds: [],
             };
             createKeywordNodePromises.push(createKeywordNodeDocument(keywordNode));
+            addedKeywordNodes.push(keywordNode);
           });
-          Promise.all(createKeywordNodePromises)
+          return Promise.all(createKeywordNodePromises)
             .then((keywordNodeIds: string[]) => {
 
               console.log(keywordNodeIds);
@@ -724,12 +727,18 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
               });
               updateKeywordNodeDocument(peopleKeywordNode);
 
-              return;
+              const keywordData: KeywordData = {
+                keywords: keywordsToAddToDb,
+                keywordNodes: addedKeywordNodes,
+                keywordRootNodeId: 'rootKeywordNodeId',
+              };
+              return keywordData;
             });
         })
         .catch((error: any) => {
           console.log('db add error: ', error);
           debugger;
+          return null;
           // if (error.code === 11000) {
           //   return;
           // } else {
@@ -738,8 +747,10 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
         });
     } catch (error: any) {
       debugger;
+      return null;
     }
   }
+  return null;
 }
 
 export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {

@@ -1,10 +1,10 @@
 import { isNil } from "lodash";
-import { Keyword, MediaItem, Tag } from '../types/entities'
+import { AddedTakeoutData, Keyword, KeywordData, MediaItem } from '../types';
 import { getAuthService } from "./googlePhotosService";
 import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
-import { addAutoPersonKeywordsToDb, addMediaItemToDb, getAllTagsFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
+import { addAutoPersonKeywordsToDb, addMediaItemToDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
 import path from "path";
 import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
@@ -21,7 +21,7 @@ const getAlbumItems = async (authService: AuthService, albumId: string): Promise
 //  input parameters
 //    albumName - corresponding to takeout file
 //    takeoutFolder - folder containing metadata for the files retrieved from a single takeout
-export const importFromTakeout = async (albumName: string, takeoutFolder: string) => {
+export const importFromTakeout = async (albumName: string, takeoutFolder: string): Promise<AddedTakeoutData> => {
 
   console.log('importFromTakeout');
 
@@ -54,7 +54,8 @@ export const importFromTakeout = async (albumName: string, takeoutFolder: string
   // Step 4
   if (mediaItemsInDb.length === 0) {
     // If there are no mediaItems in the db for this album, add all the mediaItems in the album
-    await addAllMediaItemsFromTakeout(takeoutFolder, googleMediaItemsInAlbum, albumId);
+    const addedTakeoutData: AddedTakeoutData = await addAllMediaItemsFromTakeout(takeoutFolder, googleMediaItemsInAlbum, albumId);
+    return addedTakeoutData;
   } else {
     // There are existing mediaItems in the db for this album. Compare the existing mediaItems in the db with the mediaItems in the album (and the takeout)
     debugger; // need to add support for converting people to tags, etc.
@@ -62,12 +63,12 @@ export const importFromTakeout = async (albumName: string, takeoutFolder: string
   }
 }
 
-const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string) => {
+const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string): Promise<AddedTakeoutData> => {
 
   // retrieve metadata files and image files from takeout folder
   takeoutFolder = path.join('public/takeouts', takeoutFolder);
   console.log('takeoutFolder', takeoutFolder);
-  
+
   const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
   const takeoutImageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
 
@@ -107,8 +108,12 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
     }
   }
 
+  let addedKeywordData: KeywordData = null;
+  const addedMediaItems: MediaItem[] = [];
+  
   if (personKeywordNames.size > 0) {
-    await (addAutoPersonKeywordsToDb(personKeywordNames));
+    addedKeywordData = await (addAutoPersonKeywordsToDb(personKeywordNames));
+    console.log('addedKeywordData', addedKeywordData);
   }
 
   const keywords: Keyword[] = await getKeywordsFromDb();
@@ -170,6 +175,8 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           keywordIds,
         }
 
+        addedMediaItems.push(dbMediaItem);
+
         await addMediaItemToDb(dbMediaItem);
 
       }
@@ -178,6 +185,11 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   console.log('db additions complete');
 
+  const addedTakeoutData: AddedTakeoutData = {
+    addedKeywordData,
+    addedMediaItems
+  };
+  return addedTakeoutData;
 }
 
 

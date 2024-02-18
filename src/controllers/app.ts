@@ -32,7 +32,7 @@ import {
   getTakeoutById,
   updateKeywordNodeDocument
 } from './dbInterface';
-import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar } from '../types';
+import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
@@ -378,7 +378,7 @@ export const addTakeout = async (request: Request, response: Response, next: any
 export const importFromTakeoutEndpoint = async (request: Request, response: Response, next: any) => {
   const { id } = request.body;
   const takeout: Takeout = await getTakeoutById(id);
-  await importFromTakeout(takeout.albumName, takeout.path);
-  return response.status(200).send();
+  const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
+  response.json(addedTakeoutData);
 }
 

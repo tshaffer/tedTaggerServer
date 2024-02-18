@@ -135,3 +135,7 @@ export interface Takeout {
   path: string;
 }
 
+export interface AddedTakeoutData {
+  addedKeywordData: KeywordData;
+  addedMediaItems: MediaItem[];
+}
