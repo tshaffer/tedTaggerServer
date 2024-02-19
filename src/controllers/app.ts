@@ -30,7 +30,7 @@ import {
   createTakeoutDocument,
   getTakeoutsFromDb,
   getTakeoutById,
-  updateKeywordNodeDocument
+  updateKeywordNodeDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
@@ -319,12 +319,19 @@ export const addKeywordNode = async (request: Request, response: Response, next:
   response.json(keywordNodeIdFromDb);
 }
 
+export const updateKeywordNode = async (request: Request, response: Response, next: any) => {
+  const { nodeId, keywordId, parentNodeId, childrenNodeIds } = request.body;
+  const keywordNode: KeywordNode = { nodeId, keywordId, parentNodeId, childrenNodeIds };
+  await updateKeywordNodeDb(keywordNode);
+  response.json(keywordNode);
+}
+
 export const initializeKeywordTree = async (request: Request, response: Response, next: any) => {
-  
-  const rootKeyword: Keyword = { 
-    keywordId: 'rootKeywordId', 
-    label: 'All', 
-    type: 'tbd' 
+
+  const rootKeyword: Keyword = {
+    keywordId: 'rootKeywordId',
+    label: 'All',
+    type: 'tbd'
   };
   const rootKeywordId: string = await createKeywordDocument(rootKeyword);
 
@@ -336,10 +343,10 @@ export const initializeKeywordTree = async (request: Request, response: Response
   };
   const rootKeywordNodeIdFromDb: string = await createKeywordNodeDocument(rootKeywordNode);
 
-  const peopleKeyword: Keyword = { 
-    keywordId: 'peopleKeywordId', 
-    label: 'People', 
-    type: 'tbd' 
+  const peopleKeyword: Keyword = {
+    keywordId: 'peopleKeywordId',
+    label: 'People',
+    type: 'tbd'
   };
   const peopleKeywordId: string = await createKeywordDocument(peopleKeyword);
 
@@ -352,7 +359,7 @@ export const initializeKeywordTree = async (request: Request, response: Response
   const peopleKeywordNodeIdFromDb: string = await createKeywordNodeDocument(peopleKeywordNode);
 
   rootKeywordNode.childrenNodeIds.push(peopleKeywordNode.nodeId);
-  await updateKeywordNodeDocument(rootKeywordNode);
+  await updateKeywordNodeDb(rootKeywordNode);
 
   return response.status(200).send();
 }

@@ -654,7 +654,7 @@ export const getMediaItemsInAlbumFromDb = async (albumId: string): Promise<Media
   return mediaItems;
 }
 
-export const updateKeywordNodeDocument = async (keywordNode: KeywordNode): Promise<any> => {
+export const updateKeywordNodeDb = async (keywordNode: KeywordNode): Promise<any> => {
   const keywordNodeModel = getKeywordNodeModel();
   const filter = { nodeId: keywordNode.nodeId };
   const updatedDoc = await keywordNodeModel.findOneAndUpdate(filter, keywordNode, {
@@ -725,7 +725,7 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
               keywordNodeIds.forEach((keywordNodeId: string) => {
                 peopleKeywordNode.childrenNodeIds.push(keywordNodeId);
               });
-              updateKeywordNodeDocument(peopleKeywordNode);
+              updateKeywordNodeDb(peopleKeywordNode);
 
               const keywordData: KeywordData = {
                 keywords: keywordsToAddToDb,
