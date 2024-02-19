@@ -142,3 +142,7 @@ function fsLocalFileIsDirectory(fullPath: string) {
 export function fsCreateNestedDirectory(dirPath: string) {
   return fs.mkdirp(dirPath);
 }
+
+export function fsRenameFile(oldPath: string, newPath: string) {
+  return fs.renameSync(oldPath, newPath);
+}

@@ -776,4 +776,12 @@ export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {
   }
 };
 
+export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> => {
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItem.googleId };
+  const updatedDoc = await mediaItemModel.findOneAndUpdate(filter, mediaItem, {
+    new: true,
+  }).exec();
+};
+
 

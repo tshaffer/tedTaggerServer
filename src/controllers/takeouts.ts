@@ -5,10 +5,10 @@ import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
 import { addAutoPersonKeywordsToDb, addMediaItemToDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
-import path from "path";
-import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull } from "../utilities";
+import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory, fsRenameFile } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
+import * as path from 'path';
 
 export let authService: AuthService;
 
@@ -110,7 +110,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   let addedKeywordData: KeywordData = null;
   const addedMediaItems: MediaItem[] = [];
-  
+
   if (personKeywordNames.size > 0) {
     addedKeywordData = await (addAutoPersonKeywordsToDb(personKeywordNames));
     console.log('addedKeywordData', addedKeywordData);
@@ -128,6 +128,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
     const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
 
     if (isImageFile(googleFileName)) {
+
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
 
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
@@ -154,6 +155,8 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           })
         }
 
+        // TEDTODO - move image file here....
+        
         // generate mediaItem tags from people
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
@@ -185,6 +188,23 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   console.log('db additions complete');
 
+  console.log('move files');
+
+  const mediaItemsDir = 'public/images';
+
+  for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
+    const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
+    if (isImageFile(googleFileName)) {
+      const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
+      const from = path.join(takeoutFolder, googleFileName);
+      const where = path.join(baseDir, googleFileName);
+      console.log(from);
+      console.log(where);
+      fsRenameFile(from, where);
+    }
+  }
+
+
   const addedTakeoutData: AddedTakeoutData = {
     addedKeywordData,
     addedMediaItems
@@ -192,5 +212,34 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   return addedTakeoutData;
 }
 
+let shardedDirectoryExistsByPath: any = {};
+
+export const getShardedDirectory = async (mediaItemsDir: string, photoId: string): Promise<string> => {
+
+  const numChars = photoId.length;
+  const targetDirectory = path.join(
+    mediaItemsDir,
+    photoId.charAt(numChars - 2),
+    photoId.charAt(numChars - 1),
+  );
+
+  return fsLocalFolderExists(targetDirectory)
+    .then((dirExists: boolean) => {
+      shardedDirectoryExistsByPath[targetDirectory] = true;
+      if (dirExists) {
+        return Promise.resolve(targetDirectory);
+      }
+      else {
+        return fsCreateNestedDirectory(targetDirectory)
+          .then(() => {
+            return Promise.resolve(targetDirectory);
+          });
+      }
+    })
+    .catch((err: Error) => {
+      console.log(err);
+      return Promise.reject();
+    });
+};
 
 
