@@ -3,12 +3,14 @@ import { AddedTakeoutData, Keyword, KeywordData, MediaItem } from '../types';
 import { getAuthService } from "./googlePhotosService";
 import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
-import { getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
-import { addAutoPersonKeywordsToDb, addMediaItemToDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
+import { GooglePhotoAPIs, getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
+import { addAutoPersonKeywordsToDb, addMediaItemToDb, getAllMediaItemsFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
 import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory, fsRenameFile } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
 import * as path from 'path';
+import { downloadMediaItems, downloadMediaItemsMetadata } from "./googleDownloader";
+import * as fs from 'fs-extra';
 
 export let authService: AuthService;
 
@@ -138,16 +140,13 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
         const fileName = mediaItemMetadataFromGoogleAlbum.id + fileSuffix;
 
         const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
-        const from = path.join(takeoutFolder, googleFileName);
+        // const from = path.join(takeoutFolder, googleFileName);
         const where = path.join(baseDir, fileName);
 
         // move file to mediaItemsDir
-        // const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
-        // const from = path.join(takeoutFolder, googleFileName);
-        // const where = path.join(baseDir, googleFileName);
-        console.log(from);
-        console.log(where);
-        fsRenameFile(from, where);
+        // console.log(from);
+        // console.log(where);
+        // fsRenameFile(from, where);
 
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
@@ -172,7 +171,6 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
             keywordIds.push(keywordIdByKeywordLabel[name]);
           })
         }
-
 
         // generate mediaItem tags from people
         const dbMediaItem: MediaItem = {
@@ -204,6 +202,10 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   }
 
   console.log('db additions complete');
+
+  debugger;
+  await downloadGooglePhotos(mediaItemsDir);
+  debugger;
 
   const addedTakeoutData: AddedTakeoutData = {
     addedKeywordData,
@@ -241,5 +243,111 @@ export const getShardedDirectory = async (mediaItemsDir: string, photoId: string
       return Promise.reject();
     });
 };
+
+export const downloadGooglePhotos = async (mediaItemsDir: string) => {
+
+  // const mediaItemsToDownload: MediaItem[] = [];
+
+  // await connectDB();
+
+  // const mediaItems: MediaItem[] = await getAllMediaItems();
+  // for (const mediaItem of mediaItems) {
+  //   const filePath = mediaItem.filePath;
+  //   if (isNil(filePath) || filePath.length === 0 || (!fs.existsSync(filePath))) {
+  //     mediaItemsToDownload.push(mediaItem);
+  //   }
+  // }
+
+  // const mediaItemGoogleIds: string[] = mediaItems.map((mediaItem: MediaItem) => {
+  //   return mediaItem.googleId;
+  // });
+
+  // const groups: string[][] = createGroups(mediaItemGoogleIds, GooglePhotoAPIs.BATCH_GET_LIMIT);
+  // console.log(groups);
+  const mediaItemsToDownload: MediaItem[] = await getAllMediaItems();
+
+  const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
+  console.log(mediaItemGroups);
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  const miniMediaItemGroups: MediaItem[][] = [mediaItemGroups[0], mediaItemGroups[1]];
+  await Promise.all(
+    miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
+      return downloadMediaItemsMetadata(authService, mediaItems);
+    }
+    ));
+
+  // const googleMediaItemGroups: GoogleMediaItem[][] = await Promise.all(groups.map((sliceIds: any) => {
+  //   return downloadMediaItemsMetadata(authService, sliceIds);
+  // }));
+
+  await downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
+
+  return Promise.resolve();
+}
+
+function createGroups(mediaItems: MediaItem[], groupSize: number): MediaItem[][] {
+
+  const groups: MediaItem[][] = [];
+
+  const numOfGroups = Math.ceil(mediaItems.length / groupSize);
+  for (let i = 0; i < numOfGroups; i++) {
+    const startIdx = i * groupSize;
+    const endIdx = i * groupSize + groupSize;
+
+    const subItems: MediaItem[] = mediaItems.slice(startIdx, endIdx);
+    groups.push(subItems);
+  }
+
+  return groups;
+}
+
+// export const buildGoogleMediaItemsById = async (filePath: string) => {
+
+//   if (isNil(authService)) {
+//     authService = await getAuthService();
+//   }
+//   const googleMediaItems: GoogleMediaItem[] = await getAllMediaItemsFromGoogle(authService);
+//   console.log(googleMediaItems);
+
+//   const googleMediaItemsById: IdToGoogleMediaItemArray = {};
+//   for (const googleMediaItem of googleMediaItems) {
+//     if (!googleMediaItemsById.hasOwnProperty(googleMediaItem.id)) {
+//       googleMediaItemsById[googleMediaItem.id] = [];
+//     }
+//     googleMediaItemsById[googleMediaItem.id].push(googleMediaItem);
+//   }
+
+//   const googleMediaItemsByIdInstance: GoogleMediaItemsByIdInstance = {
+//     creationDate: new Date().toISOString(),
+//     googleMediaItemsById,
+//   };
+
+//   await writeJsonToFile(
+//     filePath,
+//     googleMediaItemsByIdInstance
+//   );
+
+// }
+
+export const getAllMediaItems = async (): Promise<MediaItem[]> => {
+  // console.log('connect to db');
+  // await connectDB();
+
+  const allMediaItems: MediaItem[] = await getAllMediaItemsFromDb();
+
+  console.log('Number of mediaItems retrieved: ' + allMediaItems.length);
+
+  return allMediaItems;
+}
+
+// get googleMediaItems for named album
+// const getAlbumItems = async (authService: AuthService, albumId: string): Promise<GoogleMediaItem[]> => {
+//   const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
+//   return googleMediaItemsInAlbum;
+// }
 
 
