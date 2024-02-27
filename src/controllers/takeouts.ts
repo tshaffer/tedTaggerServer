@@ -65,6 +65,9 @@ export const importFromTakeout = async (albumName: string, takeoutFolder: string
 
 const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string): Promise<AddedTakeoutData> => {
 
+  // TEDTODO - should not be hard coded
+  const mediaItemsDir = '/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images';
+
   // retrieve metadata files and image files from takeout folder
   takeoutFolder = path.join('public/takeouts', takeoutFolder);
   console.log('takeoutFolder', takeoutFolder);
@@ -131,6 +134,21 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
       if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
 
+        const fileSuffix = path.extname(mediaItemMetadataFromGoogleAlbum.filename);
+        const fileName = mediaItemMetadataFromGoogleAlbum.id + fileSuffix;
+
+        const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
+        const from = path.join(takeoutFolder, googleFileName);
+        const where = path.join(baseDir, fileName);
+
+        // move file to mediaItemsDir
+        // const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
+        // const from = path.join(takeoutFolder, googleFileName);
+        // const where = path.join(baseDir, googleFileName);
+        console.log(from);
+        console.log(where);
+        fsRenameFile(from, where);
+
         const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
         const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
 
@@ -155,14 +173,13 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           })
         }
 
-        // TEDTODO - move image file here....
-        
+
         // generate mediaItem tags from people
         const dbMediaItem: MediaItem = {
           googleId: mediaItemMetadataFromGoogleAlbum.id,
           fileName: mediaItemMetadataFromGoogleAlbum.filename,
           albumId,
-          filePath: '',
+          filePath: where,
           productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
           baseUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.baseUrl),
           mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),
@@ -187,23 +204,6 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   }
 
   console.log('db additions complete');
-
-  console.log('move files');
-
-  const mediaItemsDir = 'public/images';
-
-  for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
-    const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
-    if (isImageFile(googleFileName)) {
-      const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItemMetadataFromGoogleAlbum.id);
-      const from = path.join(takeoutFolder, googleFileName);
-      const where = path.join(baseDir, googleFileName);
-      console.log(from);
-      console.log(where);
-      fsRenameFile(from, where);
-    }
-  }
-
 
   const addedTakeoutData: AddedTakeoutData = {
     addedKeywordData,
