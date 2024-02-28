@@ -203,9 +203,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   console.log('db additions complete');
 
-  debugger;
   await downloadGooglePhotos(mediaItemsDir);
-  debugger;
 
   const addedTakeoutData: AddedTakeoutData = {
     addedKeywordData,
@@ -216,7 +214,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
 let shardedDirectoryExistsByPath: any = {};
 
-export const getShardedDirectory = async (mediaItemsDir: string, photoId: string): Promise<string> => {
+const getShardedDirectory = async (mediaItemsDir: string, photoId: string): Promise<string> => {
 
   const numChars = photoId.length;
   const targetDirectory = path.join(
@@ -244,26 +242,8 @@ export const getShardedDirectory = async (mediaItemsDir: string, photoId: string
     });
 };
 
-export const downloadGooglePhotos = async (mediaItemsDir: string) => {
+const downloadGooglePhotos = async (mediaItemsDir: string) => {
 
-  // const mediaItemsToDownload: MediaItem[] = [];
-
-  // await connectDB();
-
-  // const mediaItems: MediaItem[] = await getAllMediaItems();
-  // for (const mediaItem of mediaItems) {
-  //   const filePath = mediaItem.filePath;
-  //   if (isNil(filePath) || filePath.length === 0 || (!fs.existsSync(filePath))) {
-  //     mediaItemsToDownload.push(mediaItem);
-  //   }
-  // }
-
-  // const mediaItemGoogleIds: string[] = mediaItems.map((mediaItem: MediaItem) => {
-  //   return mediaItem.googleId;
-  // });
-
-  // const groups: string[][] = createGroups(mediaItemGoogleIds, GooglePhotoAPIs.BATCH_GET_LIMIT);
-  // console.log(groups);
   const mediaItemsToDownload: MediaItem[] = await getAllMediaItems();
 
   const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
@@ -280,16 +260,12 @@ export const downloadGooglePhotos = async (mediaItemsDir: string) => {
     }
     ));
 
-  // const googleMediaItemGroups: GoogleMediaItem[][] = await Promise.all(groups.map((sliceIds: any) => {
-  //   return downloadMediaItemsMetadata(authService, sliceIds);
-  // }));
-
   await downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
 
   return Promise.resolve();
 }
 
-function createGroups(mediaItems: MediaItem[], groupSize: number): MediaItem[][] {
+const createGroups = (mediaItems: MediaItem[], groupSize: number): MediaItem[][] => {
 
   const groups: MediaItem[][] = [];
 
@@ -305,49 +281,9 @@ function createGroups(mediaItems: MediaItem[], groupSize: number): MediaItem[][]
   return groups;
 }
 
-// export const buildGoogleMediaItemsById = async (filePath: string) => {
-
-//   if (isNil(authService)) {
-//     authService = await getAuthService();
-//   }
-//   const googleMediaItems: GoogleMediaItem[] = await getAllMediaItemsFromGoogle(authService);
-//   console.log(googleMediaItems);
-
-//   const googleMediaItemsById: IdToGoogleMediaItemArray = {};
-//   for (const googleMediaItem of googleMediaItems) {
-//     if (!googleMediaItemsById.hasOwnProperty(googleMediaItem.id)) {
-//       googleMediaItemsById[googleMediaItem.id] = [];
-//     }
-//     googleMediaItemsById[googleMediaItem.id].push(googleMediaItem);
-//   }
-
-//   const googleMediaItemsByIdInstance: GoogleMediaItemsByIdInstance = {
-//     creationDate: new Date().toISOString(),
-//     googleMediaItemsById,
-//   };
-
-//   await writeJsonToFile(
-//     filePath,
-//     googleMediaItemsByIdInstance
-//   );
-
-// }
-
-export const getAllMediaItems = async (): Promise<MediaItem[]> => {
-  // console.log('connect to db');
-  // await connectDB();
-
+const getAllMediaItems = async (): Promise<MediaItem[]> => {
   const allMediaItems: MediaItem[] = await getAllMediaItemsFromDb();
-
-  console.log('Number of mediaItems retrieved: ' + allMediaItems.length);
-
   return allMediaItems;
 }
-
-// get googleMediaItems for named album
-// const getAlbumItems = async (authService: AuthService, albumId: string): Promise<GoogleMediaItem[]> => {
-//   const googleMediaItemsInAlbum: GoogleMediaItem[] = await getAlbumMediaItemsFromGoogle(authService, albumId, null);
-//   return googleMediaItemsInAlbum;
-// }
 
 
