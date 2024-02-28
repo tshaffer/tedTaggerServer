@@ -203,7 +203,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   console.log('db additions complete');
 
-  await downloadGooglePhotos(mediaItemsDir);
+  downloadGooglePhotos(mediaItemsDir);
 
   const addedTakeoutData: AddedTakeoutData = {
     addedKeywordData,
@@ -211,6 +211,30 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   };
   return addedTakeoutData;
 }
+
+const downloadGooglePhotos = async (mediaItemsDir: string) => {
+
+  const mediaItemsToDownload: MediaItem[] = await getAllMediaItems();
+
+  const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
+  console.log(mediaItemGroups);
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  const miniMediaItemGroups: MediaItem[][] = [mediaItemGroups[0], mediaItemGroups[1]];
+  await Promise.all(
+    miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
+      return downloadMediaItemsMetadata(authService, mediaItems);
+    }
+    ));
+
+  await downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
+
+  return Promise.resolve();
+}
+
 
 let shardedDirectoryExistsByPath: any = {};
 
@@ -241,29 +265,6 @@ const getShardedDirectory = async (mediaItemsDir: string, photoId: string): Prom
       return Promise.reject();
     });
 };
-
-const downloadGooglePhotos = async (mediaItemsDir: string) => {
-
-  const mediaItemsToDownload: MediaItem[] = await getAllMediaItems();
-
-  const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
-  console.log(mediaItemGroups);
-
-  if (isNil(authService)) {
-    authService = await getAuthService();
-  }
-
-  const miniMediaItemGroups: MediaItem[][] = [mediaItemGroups[0], mediaItemGroups[1]];
-  await Promise.all(
-    miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
-      return downloadMediaItemsMetadata(authService, mediaItems);
-    }
-    ));
-
-  await downloadMediaItems(authService, miniMediaItemGroups, mediaItemsDir);
-
-  return Promise.resolve();
-}
 
 const createGroups = (mediaItems: MediaItem[], groupSize: number): MediaItem[][] => {
 
