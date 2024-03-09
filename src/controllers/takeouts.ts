@@ -1,16 +1,15 @@
 import { isNil } from "lodash";
-import { AddedTakeoutData, Keyword, KeywordData, MediaItem } from '../types';
+import { AddedTakeoutData, Keyword, KeywordData, KeywordNode, MediaItem } from '../types';
 import { getAuthService } from "./googlePhotosService";
 import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { GooglePhotoAPIs, getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
-import { addAutoPersonKeywordsToDb, addMediaItemToDb, getAllMediaItemsFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
-import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory, fsRenameFile } from "../utilities";
+import { addAutoPersonKeywordsToDb, addMediaItemToDb, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
+import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
 import * as path from 'path';
 import { downloadMediaItems, downloadMediaItemsMetadata } from "./googleDownloader";
-import * as fs from 'fs-extra';
 
 export let authService: AuthService;
 
@@ -122,6 +121,21 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   }
 
   const keywords: Keyword[] = await getKeywordsFromDb();
+
+  const autoPersonKeywordNodes: KeywordNode[] = await getAutoPersonKeywordNodesFromDb();
+
+  const personNameToAutoPersonKeywordNodeId: StringToStringLUT = {};
+  personKeywordNames.forEach((personName: string) => {
+    autoPersonKeywordNodes.forEach((autoPersonKeywordNode: KeywordNode) => {
+      const autoPersonKeywordId: string = autoPersonKeywordNode.keywordId;
+      const keyword: Keyword = keywords.find((keyword: Keyword) => keyword.keywordId === autoPersonKeywordId);
+      if (keyword.label === personName) {
+        personNameToAutoPersonKeywordNodeId[personName] = autoPersonKeywordNode.nodeId;
+      }
+    });
+  });
+
+
   const keywordIdByKeywordLabel: StringToStringLUT = {};
   keywords.forEach((keyword: Keyword) => {
     keywordIdByKeywordLabel[keyword.label] = keyword.keywordId;
@@ -162,13 +176,12 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
         console.log('takeoutMetadata');
         console.log(takeoutMetadata);
 
-        // generate tags from people and description
-        const keywordIds: string[] = [];
+        const keywordNodeIds: string[] = [];
 
         if (!isNil(takeoutMetadata.people)) {
           takeoutMetadata.people.forEach((person: any) => {
             const name: string = person.name;
-            keywordIds.push(keywordIdByKeywordLabel[name]);
+            keywordNodeIds.push(personNameToAutoPersonKeywordNodeId[name]);
           })
         }
 
@@ -190,7 +203,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           description: valueOrNull(takeoutMetadata.description),
           geoData: valueOrNull(takeoutMetadata.geoData),
           people: valueOrNull(takeoutMetadata.people),
-          keywordIds,
+          keywordNodeIds,
         }
 
         addedMediaItems.push(dbMediaItem);

@@ -29,6 +29,7 @@ const MediaitemSchema = new Schema(
       name: String, default: ''
     }],
     tagIds: [String],
+    keywordNodeIds: [String],
   }
 );
 

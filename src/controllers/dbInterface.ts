@@ -662,6 +662,37 @@ export const updateKeywordNodeDb = async (keywordNode: KeywordNode): Promise<any
   }).exec();
 }
 
+export const getAutoPersonKeywordNodesFromDb = async (): Promise<KeywordNode[]> => {
+
+  const autoPersonKeywordNodes: KeywordNode[] = [];
+
+  const keywordNodes: KeywordNode[] = await getKeywordNodesFromDb();
+
+  const keywordNodesByNodeId: Map<string, KeywordNode> = new Map<string, KeywordNode>();
+  keywordNodes.forEach((keywordNode: KeywordNode) => {
+    keywordNodesByNodeId.set(keywordNode.nodeId, keywordNode);
+  });
+
+  let peopleKeywordNode: KeywordNode = null;
+  keywordNodes.forEach((keywordNode: KeywordNode) => {
+    if (keywordNode.nodeId === 'peopleKeywordNodeId') {
+      peopleKeywordNode = keywordNode;
+      return;
+    }
+  });
+
+  if (isNil(peopleKeywordNode)) {
+    debugger;
+  }
+
+  const autoPersonKeywordNodeIds: string[] = peopleKeywordNode.childrenNodeIds;
+  autoPersonKeywordNodeIds.forEach((autoPersonKeywordNodeId: string) => {
+    autoPersonKeywordNodes.push(keywordNodesByNodeId.get(autoPersonKeywordNodeId));
+  });
+
+  return autoPersonKeywordNodes;
+}
+
 export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promise<KeywordData> => {
 
   let peopleKeywordNode: KeywordNode = null;

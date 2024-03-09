@@ -23,7 +23,7 @@ export interface MediaItem {
   description?: string,
   geoData?: GeoData,
   people?: string[],
-  keywordIds: string[],
+  keywordNodeIds: string[],
 }
 
 export interface Tag {
