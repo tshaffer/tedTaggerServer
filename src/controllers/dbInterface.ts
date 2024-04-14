@@ -445,8 +445,6 @@ export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpe
 
 export const assignTagAvatarToDbTag = async (tagId: string, avatarType: string, avatarId: string): Promise<any> => {
 
-  console.log(tagId, avatarType, avatarId);
-
   const tagModel = getTagModel();
 
   const filter = { id: tagId };
@@ -732,8 +730,6 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
     try {
       return keywordModel.collection.insertMany(keywordsToAddToDb)
         .then((retVal: any) => {
-          console.log('keywords added successfully');
-          console.log(retVal);
 
           const createKeywordNodePromises: Promise<string>[] = [];
 
@@ -750,8 +746,6 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
           });
           return Promise.all(createKeywordNodePromises)
             .then((keywordNodeIds: string[]) => {
-
-              console.log(keywordNodeIds);
 
               keywordNodeIds.forEach((keywordNodeId: string) => {
                 peopleKeywordNode.childrenNodeIds.push(keywordNodeId);

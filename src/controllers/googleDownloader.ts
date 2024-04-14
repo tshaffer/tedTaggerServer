@@ -1,4 +1,3 @@
-import * as path from 'path';
 import * as fse from 'fs-extra';
 
 import { MediaItem } from "../types";
@@ -9,19 +8,28 @@ import { GooglePhotoAPIs } from "./googlePhotos";
 import { getHeaders, getRequest } from './googleUtils';
 
 export const downloadMediaItems = async (authService: AuthService, mediaItemGroups: MediaItem[][], mediaItemsDir: string): Promise<any> => {
+
+  let filesDownloaded = 0;
+
+  console.log('downloadMediaItems');
+
   for (const mediaItemGroup of mediaItemGroups) {
     if (!isNil(mediaItemGroup)) {
       for (const mediaItem of mediaItemGroup) {
         const retVal: any = await (downloadMediaItem(authService, mediaItem, mediaItemsDir));
-        console.log(retVal);
         if (retVal.valid) {
+          console.log(mediaItem.fileName);
+          console.log(retVal.where);
           mediaItem.filePath = retVal.where;
+          filesDownloaded++;
         } else {
           debugger;
         }
       }
     }
   }
+
+  console.log('Number of files downloaded: ', filesDownloaded);
 };
 
 const downloadMediaItem = async (authService: AuthService, mediaItem: MediaItem, mediaItemsDir: string): Promise<any> => {

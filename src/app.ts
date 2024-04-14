@@ -15,17 +15,12 @@ class App {
 
   constructor() {
 
-    console.log('app.ts constructor invoked');
-
-    console.log('readConfig');
-
     try {
       readConfig('/Users/tedshaffer/Documents/Projects/tedTaggerServer/src/config/config.env');
     } catch (err: any) {
       console.log('readConfig error');
     }
 
-    console.log('port environment variable: ', process.env.PORT);
     console.log('mongo environment variable: ', process.env.MONGO_URI);
 
     connectDB();

@@ -90,9 +90,6 @@ export const getMediaItemsToDisplayFromSearchSpec = async (request: Request, res
   };
 
   const mediaItems: MediaItem[] = await getMediaItemsToDisplayFromDbUsingSearchSpec(searchSpec);
-  console.log('matchRule: ', matchRule);
-  console.log('searchRules: ', searchRules);
-
   response.json(mediaItems);
 };
 
@@ -139,9 +136,6 @@ export const replaceTagInMediaItems = async (request: Request, response: Respons
   const { mediaItemIds, existingTagId, newTagId } = request.body;
 
   console.log('replaceTagInMediaItems');
-  console.log(mediaItemIds);
-  console.log('existingTagId: ', existingTagId);
-  console.log('newTagId: ', newTagId);
 
   await replaceTagInDbMediaItems(mediaItemIds, existingTagId, newTagId);
 

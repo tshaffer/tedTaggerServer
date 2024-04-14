@@ -117,8 +117,6 @@ export const writeJsonToFile = async (filePath: string, jsonData: any): Promise<
         console.log(err);
         return reject(err);
       }
-
-      console.log("JSON file has been saved.");
       return resolve(true);
     });
   })

@@ -78,7 +78,6 @@ export class AuthService {
 
         const tokenRequest = this._createAuthorizationTokenRequest(code, this.config.cbUrl);
         const authToken: any = await this._getToken(tokenRequest);
-        console.log('auth token ', authToken.access_token);
         this.authStorage.storeToken(authToken);
         resolve(authToken);
 

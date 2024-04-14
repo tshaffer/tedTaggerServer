@@ -117,7 +117,6 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
   if (personKeywordNames.size > 0) {
     addedKeywordData = await (addAutoPersonKeywordsToDb(personKeywordNames));
-    console.log('addedKeywordData', addedKeywordData);
   }
 
   const keywords: Keyword[] = await getKeywordsFromDb();
@@ -170,12 +169,6 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
           exifData = takeoutExifDataByImageFileName[googleFileName];
         }
 
-        console.log('googleMediaItem from album');
-        console.log(mediaItemMetadataFromGoogleAlbum);
-
-        console.log('takeoutMetadata');
-        console.log(takeoutMetadata);
-
         const keywordNodeIds: string[] = [];
 
         if (!isNil(takeoutMetadata.people)) {
@@ -227,16 +220,26 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
 const downloadGooglePhotos = async (mediaItemsDir: string) => {
 
+  console.log('downloadGooglePhotos');
+  console.log(mediaItemsDir);
+
   const mediaItemsToDownload: MediaItem[] = await getAllMediaItems();
 
+  console.log('mediaItemsToDownload count: ' + mediaItemsToDownload.length);
+
   const mediaItemGroups: MediaItem[][] = createGroups(mediaItemsToDownload, GooglePhotoAPIs.BATCH_GET_LIMIT);
-  console.log(mediaItemGroups);
+  console.log('mediaItemGroups count: ' + mediaItemGroups.length);
 
   if (isNil(authService)) {
     authService = await getAuthService();
   }
 
-  const miniMediaItemGroups: MediaItem[][] = [mediaItemGroups[0], mediaItemGroups[1]];
+  const miniMediaItemGroups: MediaItem[][] = [];
+  for (let mediaGroupIndex = 0; mediaGroupIndex < mediaItemGroups.length; mediaGroupIndex++) {
+    const mediaItemGroup: MediaItem[] = mediaItemGroups[mediaGroupIndex];
+    miniMediaItemGroups.push(mediaItemGroup);
+  }
+
   await Promise.all(
     miniMediaItemGroups.map((mediaItems: MediaItem[]) => {
       return downloadMediaItemsMetadata(authService, mediaItems);
