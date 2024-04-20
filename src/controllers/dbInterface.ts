@@ -810,9 +810,6 @@ export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> =>
 
 export const deleteMediaItemsFromDb = async (mediaItemIds: string[]): Promise<any> => {
   const mediaItemModel = getMediaitemModel();
-  // TEDTODO - create filter that specifies all mediaItemids.
-  for (const googleId of mediaItemIds) {
-    const filter = { googleId };
-    await mediaItemModel.deleteOne(filter);
-  }
+  const filter = { googleId: { $in: mediaItemIds} };
+  await mediaItemModel.deleteMany(filter);
 }
