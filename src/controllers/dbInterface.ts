@@ -215,7 +215,6 @@ export const deleteTagFromDb = async (tagId: string): Promise<any> => {
   await tagModel.deleteOne(filter);
 }
 
-
 // https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
 export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
 
@@ -809,4 +808,11 @@ export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> =>
   }).exec();
 };
 
-
+export const deleteMediaItemsFromDb = async (mediaItemIds: string[]): Promise<any> => {
+  const mediaItemModel = getMediaitemModel();
+  // TEDTODO - create filter that specifies all mediaItemids.
+  for (const googleId of mediaItemIds) {
+    const filter = { googleId };
+    await mediaItemModel.deleteOne(filter);
+  }
+}

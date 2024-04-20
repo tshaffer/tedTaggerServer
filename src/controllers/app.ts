@@ -30,7 +30,8 @@ import {
   createTakeoutDocument,
   getTakeoutsFromDb,
   getTakeoutById,
-  updateKeywordNodeDb
+  updateKeywordNodeDb,
+  deleteMediaItemsFromDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
@@ -381,5 +382,12 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
   const takeout: Takeout = await getTakeoutById(id);
   const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
   response.json(addedTakeoutData);
+}
+
+export const deleteMediaItems = async (request: Request, response: Response, next: any) => {
+  const { mediaItemIds } = request.body;
+  await deleteMediaItemsFromDb(mediaItemIds);
+  // delete file from file system
+  response.sendStatus(200);
 }
 
