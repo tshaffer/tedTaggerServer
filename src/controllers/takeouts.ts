@@ -4,7 +4,7 @@ import { getAuthService } from "./googlePhotosService";
 import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { GooglePhotoAPIs, getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
-import { addAutoPersonKeywordsToDb, addMediaItemToDb, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
+import { addAutoPersonKeywordsToDb, addMediaItemToMediaItemsDBTable, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
 import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
@@ -201,7 +201,7 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
 
         addedMediaItems.push(dbMediaItem);
 
-        await addMediaItemToDb(dbMediaItem);
+        await addMediaItemToMediaItemsDBTable(dbMediaItem);
 
       }
     }

@@ -32,7 +32,8 @@ import {
   getTakeoutById,
   updateKeywordNodeDb,
   deleteMediaItemsFromDb,
-  getMediaItemFromDb
+  getMediaItemFromDb,
+  addMediaItemToDeletedMediaItemsDBTable
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
@@ -392,12 +393,11 @@ export const deleteMediaItems = async (request: Request, response: Response, nex
 
   const filePaths: string[] = await Promise.all(mediaItemIds.map(async (iterator: string) => {
     const mediaItem: MediaItem = await getMediaItemFromDb(iterator);
+    await addMediaItemToDeletedMediaItemsDBTable(mediaItem);
     return mediaItem.filePath;
   }));
 
   await deleteMediaItemsFromDb(mediaItemIds);
-
-  console.log(filePaths);
   await fsDeleteFiles(filePaths);
   
   response.sendStatus(200);

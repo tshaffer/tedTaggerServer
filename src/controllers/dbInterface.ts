@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isArray, isEmpty, isNil } from 'lodash';
 import {
   getAppTagAvatarModel,
+  getDeletedMediaItemModel,
   getKeywordModel,
   getKeywordNodeModel,
   getKeywordTreeModel,
@@ -784,9 +785,21 @@ export const addAutoPersonKeywordsToDb = async (keywordsSet: Set<string>): Promi
   return null;
 }
 
-export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {
-
+export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> => {
   const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItem.googleId };
+  const updatedDoc = await mediaItemModel.findOneAndUpdate(filter, mediaItem, {
+    new: true,
+  }).exec();
+};
+
+export const deleteMediaItemsFromDb = async (mediaItemIds: string[]): Promise<any> => {
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: { $in: mediaItemIds} };
+  await mediaItemModel.deleteMany(filter);
+}
+
+const addMediaItemToDb = async (mediaItemModel: any, mediaItem: MediaItem): Promise<any> => {
 
   try {
     return mediaItemModel.collection.insertOne(mediaItem)
@@ -807,16 +820,12 @@ export const addMediaItemToDb = async (mediaItem: MediaItem): Promise<any> => {
   }
 };
 
-export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> => {
+export const addMediaItemToMediaItemsDBTable = async (mediaItem: MediaItem): Promise<any> => {
   const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: mediaItem.googleId };
-  const updatedDoc = await mediaItemModel.findOneAndUpdate(filter, mediaItem, {
-    new: true,
-  }).exec();
+  return addMediaItemToDb(mediaItemModel, mediaItem);
 };
 
-export const deleteMediaItemsFromDb = async (mediaItemIds: string[]): Promise<any> => {
-  const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: { $in: mediaItemIds} };
-  await mediaItemModel.deleteMany(filter);
-}
+export const addMediaItemToDeletedMediaItemsDBTable = async (mediaItem: MediaItem): Promise<any> => {
+  const mediaItemModel = getDeletedMediaItemModel();
+  return addMediaItemToDb(mediaItemModel, mediaItem);
+};
