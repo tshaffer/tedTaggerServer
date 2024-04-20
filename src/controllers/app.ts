@@ -31,13 +31,15 @@ import {
   getTakeoutsFromDb,
   getTakeoutById,
   updateKeywordNodeDb,
-  deleteMediaItemsFromDb
+  deleteMediaItemsFromDb,
+  getMediaItemFromDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
 import {
   convertStringToTagSearchOperatorEnum,
-  convertStringToTagSelectorEnum
+  convertStringToTagSelectorEnum,
+  fsDeleteFiles
 } from '../utilities';
 import { MatchRule } from 'enums';
 import { importFromTakeout } from './takeouts';
@@ -385,9 +387,18 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
 }
 
 export const deleteMediaItems = async (request: Request, response: Response, next: any) => {
+  
   const { mediaItemIds } = request.body;
+
+  const filePaths: string[] = await Promise.all(mediaItemIds.map(async (iterator: string) => {
+    const mediaItem: MediaItem = await getMediaItemFromDb(iterator);
+    return mediaItem.filePath;
+  }));
+
   await deleteMediaItemsFromDb(mediaItemIds);
-  // delete file from file system
+
+  console.log(filePaths);
+  await fsDeleteFiles(filePaths);
+  
   response.sendStatus(200);
 }
-

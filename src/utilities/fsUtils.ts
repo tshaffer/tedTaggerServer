@@ -144,3 +144,14 @@ export function fsCreateNestedDirectory(dirPath: string) {
 export function fsRenameFile(oldPath: string, newPath: string) {
   return fs.renameSync(oldPath, newPath);
 }
+
+export const fsDeleteFiles = async (filePaths: string[]) => {
+
+  const promises: Promise<any>[] = [];
+
+  for (const filePath of filePaths) {
+    promises.push(fs.remove(filePath));
+  };
+
+  return Promise.all(promises);
+}

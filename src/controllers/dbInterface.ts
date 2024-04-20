@@ -31,6 +31,13 @@ import { getPhotosToDisplaySpecModel } from '../models/PhotosToDisplaySpec';
 import { DateSearchRuleType, KeywordSearchRuleType, MatchRule, SearchRuleType } from '../types/enums';
 import { getTakeoutModel } from '../models';
 
+export const getMediaItemFromDb = async (mediaItemId: string): Promise<MediaItem> => {
+  const mediaItemModel = getMediaitemModel();
+  const filter = { googleId: mediaItemId };
+  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
+  const mediaItem: MediaItem = mediaItemDocument.toObject() as MediaItem;
+  return mediaItem;
+}
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
   const mediaItemModel = getMediaitemModel();
