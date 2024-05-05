@@ -96,7 +96,8 @@ export const getMediaItemsToDisplayFromDb = async (
 
   const mediaItemModel = getMediaitemModel();
 
-  const query = mediaItemModel.find(querySpec);
+  const query = mediaItemModel.find(querySpec).sort( { creationTime: -1 });
+  
   const documents: any = await query.exec();
   const mediaItems: MediaItem[] = [];
   for (const document of documents) {
