@@ -33,7 +33,8 @@ import {
   updateKeywordNodeDb,
   deleteMediaItemsFromDb,
   getMediaItemFromDb,
-  addMediaItemToDeletedMediaItemsDBTable
+  addMediaItemToDeletedMediaItemsDBTable,
+  getDeletedMediaItemsFromDb
 } from './dbInterface';
 import { AppTagAvatar, Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Tag, TagSearchOperator, TagSelectorType, Takeout, UserTagAvatar, AddedTakeoutData } from '../types';
 import multer from 'multer';
@@ -402,3 +403,10 @@ export const deleteMediaItems = async (request: Request, response: Response, nex
   
   response.sendStatus(200);
 }
+
+export const getDeletedMediaItems = async (request: Request, response: Response, next: any) => {
+  console.log('getDeletedMediaItems');
+  const deletedMediaItems: any = await getDeletedMediaItemsFromDb();
+  response.json(deletedMediaItems);
+};
+

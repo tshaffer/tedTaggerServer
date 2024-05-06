@@ -38,6 +38,7 @@ import {
   initializeKeywordTree,
   updateKeywordNode,
   deleteMediaItems,
+  getDeletedMediaItems,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -68,6 +69,7 @@ export class Routes {
     app.get('/api/v1/userTagAvatars', getUserTagAvatars);
     app.get('/api/v1/allKeywordData', getAllKeywordData);
     app.get('/api/v1/takeouts', getTakeouts);
+    app.get('/api/v1/deletedMediaItems', getDeletedMediaItems);
 
     app.post('/api/v1/deleteMediaItems', deleteMediaItems);
 

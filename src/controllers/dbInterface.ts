@@ -39,6 +39,7 @@ export const getMediaItemFromDb = async (mediaItemId: string): Promise<MediaItem
   const mediaItem: MediaItem = mediaItemDocument.toObject() as MediaItem;
   return mediaItem;
 }
+
 export const getAllMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
   const mediaItemModel = getMediaitemModel();
@@ -827,6 +828,21 @@ export const addMediaItemToMediaItemsDBTable = async (mediaItem: MediaItem): Pro
 };
 
 export const addMediaItemToDeletedMediaItemsDBTable = async (mediaItem: MediaItem): Promise<any> => {
-  const mediaItemModel = getDeletedMediaItemModel();
-  return addMediaItemToDb(mediaItemModel, mediaItem);
+  const deletedMediaItemModel = getDeletedMediaItemModel();
+  return addMediaItemToDb(deletedMediaItemModel, mediaItem);
 };
+
+export const getDeletedMediaItemsFromDb = async (): Promise<MediaItem[]> => {
+
+  const deletedMediaItemModel = getDeletedMediaItemModel();
+
+  const deletedMediaItems: MediaItem[] = [];
+  const documents: any = await (deletedMediaItemModel as any).find().exec();
+  for (const document of documents) {
+    const mediaItem: MediaItem = document.toObject() as MediaItem;
+    mediaItem.googleId = document.googleId.toString();
+    deletedMediaItems.push(mediaItem);
+  }
+  return deletedMediaItems;
+}
+
