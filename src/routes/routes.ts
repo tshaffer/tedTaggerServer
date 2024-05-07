@@ -39,6 +39,7 @@ import {
   updateKeywordNode,
   deleteMediaItems,
   getDeletedMediaItems,
+  removeDeletedMediaItem,
 } from '../controllers';
 import { addAppAvatars, createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -72,13 +73,14 @@ export class Routes {
     app.get('/api/v1/deletedMediaItems', getDeletedMediaItems);
 
     app.post('/api/v1/deleteMediaItems', deleteMediaItems);
+    app.post('/api/v1/removeDeletedMediaItem', removeDeletedMediaItem);
 
     app.post('/api/v1/addTag', addTag);
     app.post('/api/v1/deleteTag', deleteTag);
     app.post('/api/v1/addTagToMediaItems', addTagToMediaItems);
     app.post('/api/v1/replaceTagInMediaItems', replaceTagInMediaItems);
     app.post('/api/v1/deleteTagFromMediaItems', deleteTagFromMediaItems);
-    
+
     app.post('/api/v1/addKeyword', addKeyword);
     app.post('/api/v1/addKeywordNode', addKeywordNode);
     app.post('/api/v1/updateKeywordNode', updateKeywordNode);

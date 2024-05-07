@@ -832,6 +832,12 @@ export const addMediaItemToDeletedMediaItemsDBTable = async (mediaItem: MediaIte
   return addMediaItemToDb(deletedMediaItemModel, mediaItem);
 };
 
+export const removeDeleteMediaItemFromDb = async (mediaItemId: string): Promise<any> => {
+  const deletedMediaItemModel = getDeletedMediaItemModel();
+  const filter = { googleId: mediaItemId };
+  await deletedMediaItemModel.deleteOne(filter);
+}
+
 export const getDeletedMediaItemsFromDb = async (): Promise<MediaItem[]> => {
 
   const deletedMediaItemModel = getDeletedMediaItemModel();
