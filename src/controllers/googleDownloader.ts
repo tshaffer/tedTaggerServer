@@ -6,6 +6,7 @@ import { isNil } from "lodash";
 import { AuthService } from "../auth";
 import { GooglePhotoAPIs } from "./googlePhotos";
 import { getHeaders, getRequest } from './googleUtils';
+import { getAuthService } from './googlePhotosService';
 
 export const downloadMediaItems = async (authService: AuthService, mediaItemGroups: MediaItem[][], mediaItemsDir: string): Promise<any> => {
 
@@ -16,7 +17,7 @@ export const downloadMediaItems = async (authService: AuthService, mediaItemGrou
   for (const mediaItemGroup of mediaItemGroups) {
     if (!isNil(mediaItemGroup)) {
       for (const mediaItem of mediaItemGroup) {
-        const retVal: any = await (downloadMediaItem(authService, mediaItem, mediaItemsDir));
+        const retVal: any = await (downloadMediaItem(authService, mediaItem, false));
         if (retVal.valid) {
           console.log(mediaItem.fileName);
           console.log(retVal.where);
@@ -32,12 +33,16 @@ export const downloadMediaItems = async (authService: AuthService, mediaItemGrou
   console.log('Number of files downloaded: ', filesDownloaded);
 };
 
-const downloadMediaItem = async (authService: AuthService, mediaItem: MediaItem, mediaItemsDir: string): Promise<any> => {
+export const redownloadMediaItem = async (authService: AuthService, mediaItem: MediaItem): Promise<any> => {
+  return downloadMediaItem(authService, mediaItem, true);
+}
+
+const downloadMediaItem = async (authService: AuthService, mediaItem: MediaItem, overwrite: boolean): Promise<any> => {
 
   const where = mediaItem.filePath;
 
   // if file exists at 'where', don't redownload
-  if (fse.existsSync(where)) {
+  if (fse.existsSync(where) && !overwrite) {
     const ret: any = { valid: true, where, mediaItem };
     return Promise.resolve(ret);
   }

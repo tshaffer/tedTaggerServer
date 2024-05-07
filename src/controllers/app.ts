@@ -45,7 +45,8 @@ import {
   fsDeleteFiles
 } from '../utilities';
 import { MatchRule } from 'enums';
-import { importFromTakeout } from './takeouts';
+import { importFromTakeout, redownloadGooglePhoto } from './takeouts';
+import { redownloadMediaItem } from './googleDownloader';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -416,3 +417,11 @@ export const removeDeletedMediaItem = async (request: Request, response: Respons
   await removeDeleteMediaItemFromDb(mediaItemId);
   response.sendStatus(200);
 }
+
+export const redownloadMediaItemEndpoint = async (request: Request, response: Response, next: any) => {
+  const { id } = request.body;
+  const mediaItem: MediaItem = await getMediaItemFromDb(id);
+  await redownloadGooglePhoto(mediaItem);
+  response.sendStatus(200);
+}
+

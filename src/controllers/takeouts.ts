@@ -9,7 +9,7 @@ import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retr
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
 import * as path from 'path';
-import { downloadMediaItems, downloadMediaItemsMetadata } from "./googleDownloader";
+import { downloadMediaItems, downloadMediaItemsMetadata, redownloadMediaItem } from "./googleDownloader";
 
 export let authService: AuthService;
 
@@ -250,6 +250,16 @@ const downloadGooglePhotos = async (mediaItemsDir: string) => {
 
   return Promise.resolve();
 }
+
+export const redownloadGooglePhoto = async (mediaItem: MediaItem): Promise<any> => {
+
+  if (isNil(authService)) {
+    authService = await getAuthService();
+  }
+
+  return redownloadMediaItem(authService, mediaItem);
+}
+
 
 
 let shardedDirectoryExistsByPath: any = {};
