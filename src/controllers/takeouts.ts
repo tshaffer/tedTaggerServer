@@ -257,7 +257,7 @@ export const mergeMediaItemsFromAlbumWithDb = async (takeoutFolder: string, goog
   }
 
   // iterate through each item in the db
-  //    if it doesn't in the album / takeout, remove it from the db
+  //    if it doesn't exist in the album / takeout, remove it from the db
   for (const mediaItemInDb of mediaItemsInDb) {
     if (!takeoutAlbumMediaItemsByGoogleId.hasOwnProperty(mediaItemInDb.googleId)) {
       deleteMediaItemsFromDb([mediaItemInDb.googleId]);
@@ -330,11 +330,19 @@ export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMed
 }
 
 const mediaItemsIdentical = (mediaItemFromTakeout: MediaItem, mediaItemFromDb: MediaItem): boolean => {
-  delete (mediaItemFromDb as any)._id;
-  const savedFilePath = mediaItemFromDb.filePath;
-  const areEqual = isEqual(mediaItemFromTakeout, mediaItemFromDb);
-  mediaItemFromDb.filePath = savedFilePath;
-  return areEqual;
+  const mediaItemsAreIdentical = mediaItemFromTakeout.googleId === mediaItemFromDb.googleId &&
+    mediaItemFromTakeout.fileName === mediaItemFromDb.fileName &&
+    mediaItemFromTakeout.albumId === mediaItemFromDb.albumId &&
+    mediaItemFromTakeout.productUrl === mediaItemFromDb.productUrl &&
+    mediaItemFromTakeout.mimeType === mediaItemFromDb.mimeType &&
+    mediaItemFromTakeout.creationTime === mediaItemFromDb.creationTime &&
+    mediaItemFromTakeout.width === mediaItemFromDb.width &&
+    mediaItemFromTakeout.height === mediaItemFromDb.height &&
+    mediaItemFromTakeout.orientation === mediaItemFromDb.orientation &&
+    mediaItemFromTakeout.description === mediaItemFromDb.description &&
+    isEqual(mediaItemFromTakeout.geoData, mediaItemFromDb.geoData) &&
+    isEqual(mediaItemFromTakeout.people, mediaItemFromDb.people)
+  return mediaItemsAreIdentical;
 }
 
 
