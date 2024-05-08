@@ -1,3 +1,4 @@
+import { MediaItem } from "entities";
 import { Tags } from "exiftool-vendored";
 
 export interface TedTaggerConfiguration {
@@ -11,5 +12,9 @@ export type StringToStringLUT = {
 
 export interface FilePathToExifTags {
   [key: string]: Tags;
+}
+
+export type StringToMediaItem = {
+  [key: string]: MediaItem;
 }
 

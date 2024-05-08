@@ -1,10 +1,10 @@
-import { isNil } from "lodash";
-import { AddedTakeoutData, Keyword, KeywordData, KeywordNode, MediaItem } from '../types';
+import { isEqual, isNil } from "lodash";
+import { AddedTakeoutData, Keyword, KeywordData, KeywordNode, MediaItem, StringToMediaItem } from '../types';
 import { getAuthService } from "./googlePhotosService";
 import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { GooglePhotoAPIs, getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
-import { addAutoPersonKeywordsToDb, addMediaItemToMediaItemsDBTable, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb } from "./dbInterface";
+import { addAutoPersonKeywordsToDb, addMediaItemToMediaItemsDBTable, deleteMediaItemsFromDb, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb, updateMediaItemInDb } from "./dbInterface";
 import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
@@ -41,8 +41,6 @@ export const importFromTakeout = async (albumName: string, takeoutFolder: string
     return;
   };
   const albumId = googleAlbum.id;
-  // const albumId = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
-  // const albumId = 'AEEKk93_i7XXOBVcq3lfEtP2XOEkjUtim6tm9HjkimxvIC7j8y2o-e0MPazRGr5nlAgf_OAyGxYX';
 
   // Step 2
   // get the googleMediaItems for this album
@@ -59,8 +57,7 @@ export const importFromTakeout = async (albumName: string, takeoutFolder: string
     return addedTakeoutData;
   } else {
     // There are existing mediaItems in the db for this album. Compare the existing mediaItems in the db with the mediaItems in the album (and the takeout)
-    debugger; // need to add support for converting people to tags, etc.
-    // await mergeMediaItemsFromAlbumWithDb(takeoutFolder, googleMediaItemsInAlbum, albumId, mediaItemsInDb);
+    await mergeMediaItemsFromAlbumWithDb(takeoutFolder, googleMediaItemsInAlbum, albumId, mediaItemsInDb);
   }
 }
 
@@ -217,6 +214,129 @@ const addAllMediaItemsFromTakeout = async (takeoutFolder: string, googleMediaIte
   };
   return addedTakeoutData;
 }
+
+export const mergeMediaItemsFromAlbumWithDb = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string, mediaItemsInDb: MediaItem[]) => {
+
+  // retrieve metadata files and image files from takeout folder
+  takeoutFolder = path.join('public/takeouts', takeoutFolder);
+  console.log('takeoutFolder', takeoutFolder);
+
+  // get the items from the album / takeout
+  const takeoutAlbumMediaItems: MediaItem[] = await getTakeoutAlbumMediaItems(takeoutFolder, googleMediaItemsInAlbum, albumId);
+
+  // for mediaItemsInDb, create LUT for faster searches
+  const mediaItemInDbByGoogleId: StringToMediaItem = {};
+  mediaItemsInDb.forEach((mediaItemInDb: MediaItem) => {
+    mediaItemInDbByGoogleId[mediaItemInDb.googleId] = mediaItemInDb;
+  });
+
+  const takeoutAlbumMediaItemsByGoogleId: StringToMediaItem = {};
+  takeoutAlbumMediaItems.forEach((takeoutAlbumMediaItem: MediaItem) => {
+    takeoutAlbumMediaItemsByGoogleId[takeoutAlbumMediaItem.googleId] = takeoutAlbumMediaItem;
+  });
+
+  // iterate through each item in the album / takeout
+  // if it doesn't exist in db, add it
+  // if it exists in the db, compare it
+  //    if identical, do nothing
+  //    if changed, replace
+  for (const takeoutAlbumMediaItem of takeoutAlbumMediaItems) {
+    const googleIdForTakeoutMediaItem = takeoutAlbumMediaItem.googleId;
+    if (mediaItemInDbByGoogleId.hasOwnProperty(googleIdForTakeoutMediaItem)) {
+      // item exists in both - compare
+      const mediaItemInDb = mediaItemInDbByGoogleId[googleIdForTakeoutMediaItem];
+      // if mediaItems are different - replace existing; else, do nothing
+      if (!mediaItemsIdentical(takeoutAlbumMediaItem, mediaItemInDb)) {
+        console.log('not identical');
+        updateMediaItemInDb(takeoutAlbumMediaItem);
+      }
+    } else {
+      // item doesn't exist in db; add it.
+      await addMediaItemToMediaItemsDBTable(takeoutAlbumMediaItem);
+    }
+  }
+
+  // iterate through each item in the db
+  //    if it doesn't in the album / takeout, remove it from the db
+  for (const mediaItemInDb of mediaItemsInDb) {
+    if (!takeoutAlbumMediaItemsByGoogleId.hasOwnProperty(mediaItemInDb.googleId)) {
+      deleteMediaItemsFromDb([mediaItemInDb.googleId]);
+    }
+  }
+}
+
+export const getTakeoutAlbumMediaItems = async (takeoutFolder: string, googleMediaItemsInAlbum: GoogleMediaItem[], albumId: string): Promise<MediaItem[]> => {
+
+  const mediaItems: MediaItem[] = [];
+
+  // retrieve metadata files and image files from takeout folder
+  const takeoutMetaDataFilePaths: string[] = await getJsonFilePaths(takeoutFolder);
+  const takeoutImageFilePaths: string[] = await getImageFilePaths(takeoutFolder);
+
+  const takeoutMetaDataFilePathsByImageFileName: StringToStringLUT = {};
+  const takeoutExifDataByImageFileName: FilePathToExifTags = {};
+  for (const imageFilePath of takeoutImageFilePaths) {
+    const takeoutMetadataFilePath = imageFilePath + '.json';
+    const indexOfMetaDataFilePath = takeoutMetaDataFilePaths.indexOf(takeoutMetadataFilePath);
+    if (indexOfMetaDataFilePath >= 0) {
+      takeoutMetaDataFilePathsByImageFileName[path.basename(imageFilePath)] = takeoutMetadataFilePath;
+    }
+    const exifData: Tags = await retrieveExifData(imageFilePath);
+    takeoutExifDataByImageFileName[path.basename(imageFilePath)] = exifData;
+  };
+
+  // iterate through each media item in the album.
+  // if it is an image file, see if there is a corresponding entry in the takeout folder
+  for (const mediaItemMetadataFromGoogleAlbum of googleMediaItemsInAlbum) {
+
+    const googleFileName = mediaItemMetadataFromGoogleAlbum.filename;
+
+    if (isImageFile(googleFileName)) {
+      if (takeoutMetaDataFilePathsByImageFileName.hasOwnProperty(googleFileName)) {
+
+        const takeoutMetaDataFilePath = takeoutMetaDataFilePathsByImageFileName[googleFileName];
+        const takeoutMetadata: any = await getJsonFromFile(takeoutMetaDataFilePath);
+
+        let exifData: Tags | null = null;
+        if (takeoutExifDataByImageFileName.hasOwnProperty(googleFileName)) {
+          exifData = takeoutExifDataByImageFileName[googleFileName];
+        }
+
+        const mediaItem: MediaItem = {
+          googleId: mediaItemMetadataFromGoogleAlbum.id,
+          fileName: mediaItemMetadataFromGoogleAlbum.filename,
+          albumId,
+          filePath: '',
+          productUrl: valueOrNull(mediaItemMetadataFromGoogleAlbum.productUrl),
+          mimeType: valueOrNull(mediaItemMetadataFromGoogleAlbum.mimeType),
+          creationTime: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.creationTime),
+          width: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.width, true),
+          height: valueOrNull(mediaItemMetadataFromGoogleAlbum.mediaMetadata.height, true),
+          orientation: isNil(exifData) ? null : valueOrNull(exifData.Orientation),
+          // description: isNil(exifData) ? null : valueOrNull(takeoutMetadata.description),
+          description: valueOrNull(takeoutMetadata.description),
+          geoData: valueOrNull(takeoutMetadata.geoData),
+          people: valueOrNull(takeoutMetadata.people),
+          keywordNodeIds: [],
+        }
+
+        mediaItems.push(mediaItem);
+
+      }
+    }
+  }
+
+  return mediaItems;
+}
+
+const mediaItemsIdentical = (mediaItemFromTakeout: MediaItem, mediaItemFromDb: MediaItem): boolean => {
+  delete (mediaItemFromDb as any)._id;
+  const savedFilePath = mediaItemFromDb.filePath;
+  const areEqual = isEqual(mediaItemFromTakeout, mediaItemFromDb);
+  mediaItemFromDb.filePath = savedFilePath;
+  return areEqual;
+}
+
 
 const downloadGooglePhotos = async (mediaItemsDir: string) => {
 
