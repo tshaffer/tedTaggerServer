@@ -1,23 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { isArray, isEmpty, isNil } from 'lodash';
 import {
-  getAppTagAvatarModel,
   getDeletedMediaItemModel,
   getKeywordModel,
   getKeywordNodeModel,
   getKeywordTreeModel,
   getMediaitemModel,
-  getTagModel,
-  getUserTagAvatarModel,
 } from '../models';
 import {
-  AppTagAvatar,
   MediaItem,
-  Tag,
-  UserTagAvatar,
   PhotosToDisplaySpec,
-  TagSelectorType,
-  TagSearchOperator,
   Keyword,
   KeywordNode,
   SearchSpec,
@@ -58,39 +50,12 @@ export const getMediaItemsToDisplayFromDb = async (
   specifyDateRange: boolean,
   startDate: string | null,
   endDate: string | null,
-  specifyTagsInSearch: boolean,
-  tagSelector: TagSelectorType | null,
-  tagIds: string[] = [],
-  tagSearchOperator: TagSearchOperator | null,
 ): Promise<MediaItem[]> => {
 
   let querySpec = {};
 
   if (specifyDateRange) {
     querySpec = { creationTime: { $gte: startDate, $lte: endDate } };
-  }
-  if (specifyTagsInSearch) {
-    switch (tagSelector) {
-      case TagSelectorType.Untagged:
-        querySpec = { ...querySpec, tagIds: { $size: 0 } };
-        break;
-      case TagSelectorType.Tagged:
-        querySpec = { ...querySpec, tagIds: { $size: { $gt: 0 } } };
-        break;
-      case TagSelectorType.TagList: {
-        if (tagIds.length > 0) {
-          const tagSearchOperatorValue: string = isNil(tagSearchOperator) ? TagSearchOperator.OR : tagSearchOperator;
-          if (tagSearchOperatorValue === TagSearchOperator.AND) {
-            querySpec = { ...querySpec, tagIds: { $all: tagIds } };
-          } else {
-            querySpec = { ...querySpec, tagIds: { $in: tagIds } };
-          }
-        }
-        break;
-      }
-      default:
-        break;
-    }
   }
 
   console.log('getMediaItemsToDisplayFromDb querySpec: ', querySpec);
@@ -144,13 +109,10 @@ export const getMediaItemsToDisplayFromDbUsingSearchSpec = async (
       const keywordSearchRule: KeywordSearchRule = searchRule.searchRule as KeywordSearchRule;
       // only support KeywordSearchRuleType.Contains for now
       if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.Contains) {
-        // keywordQuerySpec = { tagIds: { $in: [keywordSearchRule.keywordNodeId] } };
         keywordNodeIds.push(keywordSearchRule.keywordNodeId);
       } else if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.AreEmpty) {
-        // keywordQuerySpec = { tagIds: { $size: 0 } };
         throw new Error('KeywordSearchRuleType.AreEmpty not supported');
       } else if (keywordSearchRule.keywordSearchRuleType === KeywordSearchRuleType.AreNotEmpty) {
-        // keywordQuerySpec = { tagIds: { $size: { $gt: 0 } } };
         throw new Error('KeywordSearchRuleType.AreNotEmpty not supported');
       } else {
         throw new Error('keywordSearchRuleType not recognized');
@@ -188,128 +150,6 @@ export const getMediaItemsToDisplayFromDbUsingSearchSpec = async (
   return mediaItems;
 }
 
-export const getAllTagsFromDb = async (): Promise<Tag[]> => {
-
-  const tagModel = getTagModel();
-
-  const tags: Tag[] = [];
-  const documents: any = await (tagModel as any).find().exec();
-  for (const document of documents) {
-    const tag: Tag = document.toObject() as Tag;
-    tag.id = document.id.toString();
-    tag.label = document.label.toString();
-    tags.push(tag);
-  }
-  return tags;
-}
-
-export const createTagDocument = async (tag: Tag): Promise<Document | void> => {
-
-  const tagModel = getTagModel();
-
-  return tagModel.create(tag)
-    .then((tagDocument: any) => {
-      return Promise.resolve(tagDocument);
-    }).catch((err: any) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        console.log('Duplicate key error in createTagDocument: ', tag);
-      }
-      // return Promise.reject(err);
-      return Promise.resolve();
-    });
-};
-
-export const deleteTagFromDb = async (tagId: string): Promise<any> => {
-  const tagModel = getTagModel();
-  const filter = { id: tagId };
-  await tagModel.deleteOne(filter);
-}
-
-// https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-export const addTagToDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
-
-  const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: mediaItemId };
-
-  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
-  mediaItemDocument.get('tagIds').push(tagId);
-  mediaItemDocument.markModified('tagIds');
-  return await mediaItemDocument.save();
-}
-
-export const addTagToDbMediaItems = async (mediaItemIds: string[], tagId: string): Promise<any> => {
-
-  // better db interface to do the this??
-
-  const promises: Promise<any>[] = [];
-  mediaItemIds.forEach((mediaItemId: string) => {
-    promises.push(addTagToDbMediaItem(mediaItemId, tagId));
-  });
-  return Promise.all(promises)
-    .then(() => {
-      return Promise.resolve();
-    })
-}
-
-export const replaceTagInDbMediaItem = async (mediaItemId: string, existingTagId: string, newTagId: string): Promise<any> => {
-
-  const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: mediaItemId };
-
-  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
-
-  // probably a better way to do this
-  const indexOfExistingTagId = mediaItemDocument.get('tagIds').indexOf(existingTagId);
-  if (indexOfExistingTagId > -1) {
-    mediaItemDocument.get('tagIds')[indexOfExistingTagId] = newTagId;
-    mediaItemDocument.markModified('tagIds');
-    return await mediaItemDocument.save();
-  }
-
-  console.log('existingTagId not found in mediaItemDocument');
-  return Promise.resolve();
-}
-
-
-export const replaceTagInDbMediaItems = async (mediaItemIds: string[], existingTagId: string, newTagId: string): Promise<any> => {
-
-  // better db interface to do the this??
-
-  const promises: Promise<any>[] = [];
-  mediaItemIds.forEach((mediaItemId: string) => {
-    promises.push(replaceTagInDbMediaItem(mediaItemId, existingTagId, newTagId));
-  });
-  return Promise.all(promises)
-    .then(() => {
-      return Promise.resolve();
-    })
-}
-
-export const deleteTagFromDbMediaItem = async (mediaItemId: string, tagId: string): Promise<any> => {
-
-  const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: mediaItemId };
-
-  const mediaItemDocument: Document = await mediaItemModel.findOne(filter);
-  mediaItemDocument.get('tagIds').pull(tagId);
-  mediaItemDocument.markModified('tagIds');
-  return await mediaItemDocument.save();
-}
-
-export const deleteTagFromDbMediaItems = async (mediaItemIds: string[], tagId: string): Promise<any> => {
-
-  // better db interface to do the this??
-
-  const promises: Promise<any>[] = [];
-  mediaItemIds.forEach((mediaItemId: string) => {
-    promises.push(deleteTagFromDbMediaItem(mediaItemId, tagId));
-  });
-  return Promise.all(promises)
-    .then(() => {
-      return Promise.resolve();
-    })
-}
-
 export const createPhotosToDisplaySpecDocument = async (photosToDisplaySpec: PhotosToDisplaySpec): Promise<Document | void> => {
   const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
   return photosToDisplaySpecModel.create(photosToDisplaySpec)
@@ -345,81 +185,12 @@ export const setDateRangeSpecificationDb = async (specifyDateRange: boolean, sta
               specifyDateRange,
               startDate,
               endDate,
-              specifyTagExistence: false,
-              specifySearchWithTags: false,
-              tagIds: [],
             })
               .then((photosToDisplayDocument: any) => {
                 return Promise.resolve();
               });
           } if (photosToDisplaySpecDocs.length === 1) {
             updateDateRangeSpecificationSelector(photosToDisplaySpecModel, specifyDateRange, startDate, endDate);
-            return Promise.resolve();
-          }
-        } else {
-          console.log('photosToDisplaySpecDocs is not an array');
-          return Promise.reject('photosToDisplaySpecDocs is not an array');
-        }
-    });
-}
-
-const updateTagExistenceSpecificationSelector = async (photosToDisplaySpecModel: any, specifyTagExistence: boolean, tagSelector?: TagSelectorType): Promise<any> => {
-  const update: any = { specifyTagExistence };
-  if (tagSelector) {
-    update.tagSelector = tagSelector;
-  }
-  const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
-}
-
-export const setTagExistenceSpecificationDb = async (specifyTagExistence: boolean, tagSelector?: TagSelectorType): Promise<any> => {
-  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  return photosToDisplaySpecModel.find({}
-    , (err: any, photosToDisplaySpecDocs: any) => {
-      if (err) {
-        console.log(err);
-      } else
-        if (isArray(photosToDisplaySpecDocs)) {
-          if (photosToDisplaySpecDocs.length === 0) {
-            createPhotosToDisplaySpecDocument({
-              specifyDateRange: false,
-              specifyTagExistence,
-              tagSelector,
-              specifySearchWithTags: false,
-              tagIds: [],
-            })
-              .then((photosToDisplayDocument: any) => {
-                return Promise.resolve();
-              });
-          } if (photosToDisplaySpecDocs.length === 1) {
-            updateTagExistenceSpecificationSelector(photosToDisplaySpecModel, specifyTagExistence, tagSelector);
-            return Promise.resolve();
-          }
-        } else {
-          console.log('photosToDisplaySpecDocs is not an array');
-          return Promise.reject('photosToDisplaySpecDocs is not an array');
-        }
-    });
-}
-
-
-const updateTagSelector = async (tagSelector: string): Promise<any> => {
-  const photosToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  const update: any = { tagSpec: tagSelector };
-  const doc = await photosToDisplaySpecModel.findOneAndUpdate({}, update, { new: true });
-}
-
-export const setTagSelectorDb = async (tagSelector: TagSelectorType): Promise<any> => {
-  const photoToDisplaySpecModel = getPhotosToDisplaySpecModel();
-  return photoToDisplaySpecModel.find({}
-    , (err: any, photosToDisplaySpecDocs: any) => {
-      if (err) {
-        console.log(err);
-      } else
-        if (isArray(photosToDisplaySpecDocs)) {
-          if (photosToDisplaySpecDocs.length === 0) {
-            throw new Error('photosToDisplaySpecDocs.length === 0');
-          } if (photosToDisplaySpecDocs.length === 1) {
-            updateTagSelector(tagSelector);
             return Promise.resolve();
           }
         } else {
@@ -437,9 +208,6 @@ export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpe
 
   let photosToDisplaySpec: PhotosToDisplaySpec = {
     specifyDateRange: false,
-    specifyTagExistence: false,
-    specifySearchWithTags: false,
-    tagIds: [],
   };
 
   const documents: any = await (photoToDisplaySpecModel as any).find().exec();
@@ -450,87 +218,6 @@ export const getPhotosToDisplaySpecFromDb = async (): Promise<PhotosToDisplaySpe
   }
 
   return photosToDisplaySpec;
-}
-
-export const assignTagAvatarToDbTag = async (tagId: string, avatarType: string, avatarId: string): Promise<any> => {
-
-  const tagModel = getTagModel();
-
-  const filter = { id: tagId };
-  const tagDocument: Document = await tagModel.findOne(filter);
-  if (!isNil(tagDocument)) {
-    tagDocument.set('avatarType', avatarType);
-    tagDocument.set('avatarId', avatarId);
-    tagDocument.save();
-  }
-}
-
-export const updateDbTagLabel = async (tagId: string, tagLabel: string): Promise<any> => {
-
-  const tagModel = getTagModel();
-
-  const filter = { id: tagId };
-  const tagDocument: Document = await tagModel.findOne(filter);
-  if (!isNil(tagDocument)) {
-    tagDocument.set('label', tagLabel);
-    tagDocument.save();
-  }
-}
-
-
-export const createAppTagAvatarDocument = async (appTagAvatar: AppTagAvatar): Promise<Document | void> => {
-  const appTagAvatarModel = getAppTagAvatarModel();
-  return appTagAvatarModel.create(appTagAvatar)
-    .then((appTagAvatarDocument: any) => {
-      return Promise.resolve(appTagAvatarDocument);
-    }).catch((err: any) => {
-      return Promise.reject(err);
-    });
-}
-
-export const getAllAppTagAvatarsFromDb = async (): Promise<AppTagAvatar[]> => {
-
-  const appTagAvatarModel = getAppTagAvatarModel();
-
-  const appTagAvatars: AppTagAvatar[] = [];
-  const documents: any = await (appTagAvatarModel as any).find().exec();
-  for (const document of documents) {
-    const appTagAvatar: AppTagAvatar = document.toObject() as AppTagAvatar;
-    appTagAvatar.id = document.id.toString();
-    appTagAvatar.label = document.label.toString();
-    appTagAvatar.pathToLarge = document.pathToLarge.toString();
-    appTagAvatar.path = document.path.toString();
-    appTagAvatars.push(appTagAvatar);
-  }
-  return appTagAvatars;
-}
-
-export const createUserTagAvatarDocument = async (userTagAvatar: UserTagAvatar): Promise<string> => {
-  const userTagAvatarModel = getUserTagAvatarModel();
-  return userTagAvatarModel.create(userTagAvatar)
-    .then((userTagAvatarDocument: any) => {
-      const userTagAvatar: UserTagAvatar = userTagAvatarDocument.toObject() as UserTagAvatar;
-      const userTagAvatarId = userTagAvatar.id;
-      return Promise.resolve(userTagAvatarId);
-    }).catch((err: any) => {
-      return Promise.reject(err);
-    });
-}
-
-export const getAllUserTagAvatarsFromDb = async (): Promise<UserTagAvatar[]> => {
-
-  const userTagAvatarModel = getUserTagAvatarModel();
-
-  const userTagAvatars: UserTagAvatar[] = [];
-  const documents: any = await (userTagAvatarModel as any).find().exec();
-  for (const document of documents) {
-    const userTagAvatar: UserTagAvatar = document.toObject() as UserTagAvatar;
-    userTagAvatar.id = document.id.toString();
-    userTagAvatar.label = document.label.toString();
-    userTagAvatar.path = document.path.toString();
-    userTagAvatars.push(userTagAvatar);
-  }
-  return userTagAvatars;
 }
 
 export const getKeywordsFromDb = async (): Promise<Keyword[]> => {
