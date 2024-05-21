@@ -62,8 +62,8 @@ export const getMediaItemsToDisplayFromDb = async (
 
   const mediaItemModel = getMediaitemModel();
 
-  const query = mediaItemModel.find(querySpec).sort( { creationTime: -1 });
-  //   const query = mediaItemModel.find(querySpec).limit(8).sort( { creationTime: -1 });
+  // const query = mediaItemModel.find(querySpec).sort( { creationTime: -1 });
+  const query = mediaItemModel.find(querySpec).limit(8).sort({ creationTime: -1 });
 
   const documents: any = await query.exec();
   const mediaItems: MediaItem[] = [];
@@ -485,7 +485,7 @@ export const updateMediaItemInDb = async (mediaItem: MediaItem): Promise<any> =>
 
 export const deleteMediaItemsFromDb = async (mediaItemIds: string[]): Promise<any> => {
   const mediaItemModel = getMediaitemModel();
-  const filter = { googleId: { $in: mediaItemIds} };
+  const filter = { googleId: { $in: mediaItemIds } };
   await mediaItemModel.deleteMany(filter);
 }
 
