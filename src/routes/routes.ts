@@ -23,6 +23,7 @@ import {
   updateKeywordNode,
   deleteMediaItems,
   getDeletedMediaItems,
+  clearDeletedMediaItems,
   removeDeletedMediaItem,
   redownloadMediaItemEndpoint,
 } from '../controllers';
@@ -53,6 +54,7 @@ export class Routes {
     app.get('/api/v1/deletedMediaItems', getDeletedMediaItems);
 
     app.post('/api/v1/deleteMediaItems', deleteMediaItems);
+    app.post('/api/v1/clearDeletedMediaItems', clearDeletedMediaItems);
     app.post('/api/v1/removeDeletedMediaItem', removeDeletedMediaItem);
 
     app.post('/api/v1/addKeyword', addKeyword);

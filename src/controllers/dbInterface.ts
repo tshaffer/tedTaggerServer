@@ -63,7 +63,8 @@ export const getMediaItemsToDisplayFromDb = async (
   const mediaItemModel = getMediaitemModel();
 
   const query = mediaItemModel.find(querySpec).sort( { creationTime: -1 });
-  
+  //   const query = mediaItemModel.find(querySpec).limit(8).sort( { creationTime: -1 });
+
   const documents: any = await query.exec();
   const mediaItems: MediaItem[] = [];
   for (const document of documents) {
@@ -518,6 +519,11 @@ export const addMediaItemToDeletedMediaItemsDBTable = async (mediaItem: MediaIte
   const deletedMediaItemModel = getDeletedMediaItemModel();
   return addMediaItemToDb(deletedMediaItemModel, mediaItem);
 };
+
+export const clearDeletedMediaItemsDb = async (): Promise<any> => {
+  const deletedMediaItemModel = getDeletedMediaItemModel();
+  await deletedMediaItemModel.deleteMany({});
+}
 
 export const removeDeleteMediaItemFromDb = async (mediaItemId: string): Promise<any> => {
   const deletedMediaItemModel = getDeletedMediaItemModel();

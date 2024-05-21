@@ -22,7 +22,8 @@ import {
   getMediaItemFromDb,
   addMediaItemToDeletedMediaItemsDBTable,
   getDeletedMediaItemsFromDb,
-  removeDeleteMediaItemFromDb
+  removeDeleteMediaItemFromDb,
+  clearDeletedMediaItemsDb
 } from './dbInterface';
 import { Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Takeout, AddedTakeoutData } from '../types';
 import multer from 'multer';
@@ -211,6 +212,12 @@ export const getDeletedMediaItems = async (request: Request, response: Response,
   const deletedMediaItems: any = await getDeletedMediaItemsFromDb();
   response.json(deletedMediaItems);
 };
+
+export const clearDeletedMediaItems = async (request: Request, response: Response, next: any) => {
+  console.log('clearDeletedMediaItems');
+  await clearDeletedMediaItemsDb();
+  response.sendStatus(200);
+}
 
 export const removeDeletedMediaItem = async (request: Request, response: Response, next: any) => {
   const { mediaItemId } = request.body;
