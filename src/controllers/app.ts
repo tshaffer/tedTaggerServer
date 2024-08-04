@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
-import * as path from 'path';
-
-const sharp = require('sharp');
+import {
+  getSubdirectories
+} from '../utilities';
 
 import { version } from '../version';
 import {
@@ -32,6 +32,7 @@ import {
 } from '../utilities';
 import { MatchRule } from 'enums';
 import { importFromTakeout, redownloadGooglePhoto } from './takeouts';
+import path from 'path';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -232,3 +233,25 @@ export const redownloadMediaItemEndpoint = async (request: Request, response: Re
   response.sendStatus(200);
 }
 
+export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
+
+  // console.log('__dirname:', __dirname);
+  // __dirname: /Users/tedshaffer/Documents/Projects/tedTaggerServer/dist/controllers
+
+  const projectRoot = process.cwd();
+  // console.log('projectRoot:', projectRoot);
+  // projectRoot: /Users/tedshaffer/Documents/Projects/tedTaggerServer
+
+  // const relativeDirPath: string = request.query.dirPath as string;
+  // const relativeDirPath: string = './public/images';
+  const relativeDirPath: string = 'public/images';
+  const absoluteDirPath = path.resolve(projectRoot, relativeDirPath);
+  console.log('absoluteDirPath:', absoluteDirPath);
+
+  // const dirPath: string = request.query.dirPath as string;
+  // const dirPath: string = "/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images";
+  // console.log('dirPath:', dirPath);
+  const files: string[] = await getSubdirectories(absoluteDirPath);
+  console.log('files:', files);
+  response.json(files);
+}

@@ -26,6 +26,7 @@ import {
   clearDeletedMediaItems,
   removeDeletedMediaItem,
   redownloadMediaItemEndpoint,
+  getSubdirectoriesFromFs,
 } from '../controllers';
 import { createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -52,6 +53,8 @@ export class Routes {
     app.get('/api/v1/allKeywordData', getAllKeywordData);
     app.get('/api/v1/takeouts', getTakeouts);
     app.get('/api/v1/deletedMediaItems', getDeletedMediaItems);
+
+    app.get('/api/v1/subdirectoriesFromFs', getSubdirectoriesFromFs);
 
     app.post('/api/v1/deleteMediaItems', deleteMediaItems);
     app.post('/api/v1/clearDeletedMediaItems', clearDeletedMediaItems);
