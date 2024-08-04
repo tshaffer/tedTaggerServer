@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 
+import * as fs from 'fs';
+import { promisify } from 'util';
+
 import {
   getSubdirectories
 } from '../utilities';
@@ -193,7 +196,7 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
 }
 
 export const deleteMediaItems = async (request: Request, response: Response, next: any) => {
-  
+
   const { mediaItemIds } = request.body;
 
   const filePaths: string[] = await Promise.all(mediaItemIds.map(async (iterator: string) => {
@@ -204,7 +207,7 @@ export const deleteMediaItems = async (request: Request, response: Response, nex
 
   await deleteMediaItemsFromDb(mediaItemIds);
   await fsDeleteFiles(filePaths);
-  
+
   response.sendStatus(200);
 }
 
@@ -233,25 +236,50 @@ export const redownloadMediaItemEndpoint = async (request: Request, response: Re
   response.sendStatus(200);
 }
 
+// export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
+
+//   const projectRoot = process.cwd();
+//   const relativeDirPath: string = request.query.dirPath as string;
+//   const absoluteDirPath = path.resolve(projectRoot, relativeDirPath);
+
+//   console.log('absoluteDirPath:', absoluteDirPath);
+
+//   const files: string[] = await getSubdirectories(absoluteDirPath);
+//   console.log('files:', files);
+//   response.json(files);
+// }
+
+const realpath = promisify(fs.realpath);
+
 export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
+  
+  // const dirPath = request.query.dirPath as string;
+// async function getSubdirectoriesFromFs(dirPath: string): Promise<string[]> {
+  
+// const dirPath = '/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/SHAFFEROTO';
+const dirPath = '/Volumes/SHAFFEROTO';
 
-  // console.log('__dirname:', __dirname);
-  // __dirname: /Users/tedshaffer/Documents/Projects/tedTaggerServer/dist/controllers
+try {
+    // Resolve the real path in case the directory is a symlink
+    const realDirPath = await realpath(dirPath);
 
-  const projectRoot = process.cwd();
-  // console.log('projectRoot:', projectRoot);
-  // projectRoot: /Users/tedshaffer/Documents/Projects/tedTaggerServer
-
-  // const relativeDirPath: string = request.query.dirPath as string;
-  // const relativeDirPath: string = './public/images';
-  const relativeDirPath: string = 'public/images';
-  const absoluteDirPath = path.resolve(projectRoot, relativeDirPath);
-  console.log('absoluteDirPath:', absoluteDirPath);
-
-  // const dirPath: string = request.query.dirPath as string;
-  // const dirPath: string = "/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images";
-  // console.log('dirPath:', dirPath);
-  const files: string[] = await getSubdirectories(absoluteDirPath);
-  console.log('files:', files);
-  response.json(files);
+    const dirents = await fs.promises.readdir(realDirPath, { withFileTypes: true });
+    const files = dirents
+      .filter(dirent => dirent.isFile())
+      .map(dirent => path.join(realDirPath, dirent.name));
+    console.log('files:', files);
+    response.json(files);
+    // return files;
+  } catch (err) {
+    if (err.code === 'EACCES') {
+      console.error('Permission denied:', err.path);
+    } else if (err.code === 'ENOENT') {
+      console.error('Directory does not exist:', err.path);
+    } else if (err.code === 'EPERM') {
+      console.error('Operation not permitted:', err.path);
+    } else {
+      console.error('Error reading directory:', err);
+    }
+    throw err;
+  }
 }
