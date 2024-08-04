@@ -1,8 +1,7 @@
 import * as fs from 'fs-extra';
 import path from 'path';
 import * as nodeDir from 'node-dir';
-import * as dir from 'node-dir';
-import { readdir } from 'node:fs/promises';
+import { promisify } from 'util';
 
 const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.heic', '.HEIC'];
 
@@ -15,33 +14,28 @@ const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '
 //   [key: string]: MatchedPhoto[]
 // }
 
-export const getSubdirectories = async (dirPath: string): Promise<string[]> => {
-  // try {
-  //     const files: string[] = await dir.promiseFiles(dirPath);
-  //     return files;
-  // } catch (err) {
-  //     console.error('Unable to scan directory:', err);
-  //     throw err;
-  // }
+const realpath = promisify(fs.realpath);
 
-  // try {
-  //   const files: string[] = await dir.promiseFiles(dirPath);
-  //   return files;
-  // } catch (err) {
-  //   console.error('Unable to scan directory:', err);
-  //   throw err;
-  // }
-
+export const getSubdirectoriesFromFs = async (dirPath: string): Promise<string[]> => {
   try {
-    const files = await readdir(dirPath);
-
-    // const dirents = await fs.promises.readdir(dirPath, { withFileTypes: true });
-    // const files = dirents
-    //   .filter(dirent => dirent.isFile())
-    //   .map(dirent => path.join(dirPath, dirent.name));
+    const realDirPath: string = await realpath(dirPath) as unknown as string;
+    const dirents: fs.Dirent[] = await fs.promises.readdir(realDirPath, { withFileTypes: true });
+    const files = dirents
+      .filter(dirent => dirent.isDirectory())
+      // .map(dirent => path.join(realDirPath, dirent.name));
+      .map(dirent => dirent.name);
+    console.log('files:', files);
     return files;
   } catch (err) {
-    console.error('Unable to scan directory:', err);
+    if (err.code === 'EACCES') {
+      console.error('Permission denied:', err.path);
+    } else if (err.code === 'ENOENT') {
+      console.error('Directory does not exist:', err.path);
+    } else if (err.code === 'EPERM') {
+      console.error('Operation not permitted:', err.path);
+    } else {
+      console.error('Error reading directory:', err);
+    }
     throw err;
   }
 }

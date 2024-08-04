@@ -1,12 +1,5 @@
 import { Request, Response } from 'express';
 
-import * as fs from 'fs';
-import { promisify } from 'util';
-
-import {
-  getSubdirectories
-} from '../utilities';
-
 import { version } from '../version';
 import {
   getMediaItemsToDisplayFromDb,
@@ -31,11 +24,13 @@ import {
 import { Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Takeout, AddedTakeoutData } from '../types';
 import multer from 'multer';
 import {
-  fsDeleteFiles
+  fsDeleteFiles,
+  getSubdirectoriesFromFs
 } from '../utilities';
 import { MatchRule } from 'enums';
 import { importFromTakeout, redownloadGooglePhoto } from './takeouts';
 import path from 'path';
+import { importFromLocalStorage } from './localStorage';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -197,6 +192,7 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
 
 export const importFromLocalStorageEndpoint = async (request: Request, response: Response, next: any) => {
   const { folder } = request.body;
+  await importFromLocalStorage(folder);
   // const takeout: Takeout = await getTakeoutById(id);
   // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
   // response.json(addedTakeoutData);
@@ -242,32 +238,6 @@ export const redownloadMediaItemEndpoint = async (request: Request, response: Re
   const mediaItem: MediaItem = await getMediaItemFromDb(id);
   await redownloadGooglePhoto(mediaItem);
   response.sendStatus(200);
-}
-
-const realpath = promisify(fs.realpath);
-
-export const getSubdirectoriesFromFs = async (dirPath: string): Promise<string[]> => {
-  try {
-    const realDirPath = await realpath(dirPath);
-    const dirents: fs.Dirent[] = await fs.promises.readdir(realDirPath, { withFileTypes: true });
-    const files = dirents
-      .filter(dirent => dirent.isDirectory())
-      // .map(dirent => path.join(realDirPath, dirent.name));
-      .map(dirent => dirent.name);
-    console.log('files:', files);
-    return files;
-  } catch (err) {
-    if (err.code === 'EACCES') {
-      console.error('Permission denied:', err.path);
-    } else if (err.code === 'ENOENT') {
-      console.error('Directory does not exist:', err.path);
-    } else if (err.code === 'EPERM') {
-      console.error('Operation not permitted:', err.path);
-    } else {
-      console.error('Error reading directory:', err);
-    }
-    throw err;
-  }
 }
 
 export const getLocalDriveImportFolders = async (request: Request, response: Response, next: any) => {
