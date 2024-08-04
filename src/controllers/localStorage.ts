@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { ExifDateTime, Tags } from "exiftool-vendored";
-import { parse, format } from 'date-fns';
 
 import { getImageFilePaths, retrieveExifData, valueOrNull } from "../utilities";
 import { GeoData, MediaItem } from "entities";
 import { isNil } from "lodash";
 import path from 'path';
+import { DateTime } from 'luxon';
 
 export const importFromLocalStorage = async (folder: string): Promise<any> => {
 
@@ -47,7 +47,7 @@ export const importFromLocalStorage = async (folder: string): Promise<any> => {
   }
 
   console.log('dbMediaItem:', dbMediaItem);
-  
+
   return Promise.resolve();
 }
 
@@ -82,13 +82,23 @@ async function convertCreateDateToISO(tags: Tags): Promise<string | null> {
     let isoDateString: string;
 
     if (createDate instanceof ExifDateTime) {
-      // If CreateDate is an ExifDateTime object, use its properties directly
-      isoDateString = createDate.toISOString();
+      // If CreateDate is an ExifDateTime object, use its properties directly and set to UTC
+      const dateTime = DateTime.fromObject({
+        year: createDate.year,
+        month: createDate.month,
+        day: createDate.day,
+        hour: createDate.hour,
+        minute: createDate.minute,
+        second: createDate.second,
+        millisecond: createDate.millisecond,
+        zone: 'utc'
+      });
+      isoDateString = dateTime.toISO();
     } else {
-      // If CreateDate is a string, parse and format it
-      // Assuming the string format is "YYYY:MM:DD HH:MM:SS"
-      const parsedDate = new Date(createDate.replace(/:/g, '-').replace(' ', 'T') + 'Z');
-      isoDateString = format(parsedDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+      // If CreateDate is a string, parse and format it using Luxon and set to UTC
+      // Assuming the string format is "yyyy:MM:dd HH:mm:ss"
+      const parsedDate = DateTime.fromFormat(createDate, 'yyyy:MM:dd HH:mm:ss', { zone: 'utc' });
+      isoDateString = parsedDate.toISO();
     }
 
     return isoDateString;

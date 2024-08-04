@@ -1,8 +1,6 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
-        "skipLibCheck": true,
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es6",
