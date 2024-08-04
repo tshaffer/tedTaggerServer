@@ -27,6 +27,7 @@ import {
   removeDeletedMediaItem,
   redownloadMediaItemEndpoint,
   getLocalDriveImportFolders,
+  importFromLocalStorageEndpoint,
 } from '../controllers';
 import { createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -73,6 +74,7 @@ export class Routes {
 
     app.post('/api/v1/addTakeout', addTakeout);
     app.post('/api/v1/importFromTakeout', importFromTakeoutEndpoint);
+    app.post('/api/v1/importFromLocalStorage', importFromLocalStorageEndpoint);
 
     app.post('/api/v1/redownloadMediaItem', redownloadMediaItemEndpoint);
   }

@@ -195,6 +195,14 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
   response.json(addedTakeoutData);
 }
 
+export const importFromLocalStorageEndpoint = async (request: Request, response: Response, next: any) => {
+  const { folder } = request.body;
+  // const takeout: Takeout = await getTakeoutById(id);
+  // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
+  // response.json(addedTakeoutData);
+  response.sendStatus(200);
+}
+
 export const deleteMediaItems = async (request: Request, response: Response, next: any) => {
 
   const { mediaItemIds } = request.body;
