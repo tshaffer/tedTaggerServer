@@ -1,8 +1,6 @@
 import * as fs from 'fs-extra';
 import path from 'path';
 import * as nodeDir from 'node-dir';
-import * as dir from 'node-dir';
-import { readdir } from 'node:fs/promises';
 
 const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.heic', '.HEIC'];
 
@@ -14,37 +12,6 @@ const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '
 // type IdToMatchedPhotoArray = {
 //   [key: string]: MatchedPhoto[]
 // }
-
-export const getSubdirectories = async (dirPath: string): Promise<string[]> => {
-  // try {
-  //     const files: string[] = await dir.promiseFiles(dirPath);
-  //     return files;
-  // } catch (err) {
-  //     console.error('Unable to scan directory:', err);
-  //     throw err;
-  // }
-
-  // try {
-  //   const files: string[] = await dir.promiseFiles(dirPath);
-  //   return files;
-  // } catch (err) {
-  //   console.error('Unable to scan directory:', err);
-  //   throw err;
-  // }
-
-  try {
-    const files = await readdir(dirPath);
-
-    // const dirents = await fs.promises.readdir(dirPath, { withFileTypes: true });
-    // const files = dirents
-    //   .filter(dirent => dirent.isFile())
-    //   .map(dirent => path.join(dirPath, dirent.name));
-    return files;
-  } catch (err) {
-    console.error('Unable to scan directory:', err);
-    throw err;
-  }
-}
 
 const getFilesInDirectory = (rootDirPath: string): string[] => {
   return nodeDir.files(rootDirPath, { sync: true });

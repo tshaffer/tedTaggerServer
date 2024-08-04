@@ -3,10 +3,6 @@ import { Request, Response } from 'express';
 import * as fs from 'fs';
 import { promisify } from 'util';
 
-import {
-  getSubdirectories
-} from '../utilities';
-
 import { version } from '../version';
 import {
   getMediaItemsToDisplayFromDb,
@@ -29,14 +25,13 @@ import {
   clearDeletedMediaItemsDb
 } from './dbInterface';
 import { Keyword, KeywordData, KeywordNode, MediaItem, SearchRule, SearchSpec, Takeout, AddedTakeoutData } from '../types';
-import multer from 'multer';
 import {
   fsDeleteFiles
 } from '../utilities';
 import { MatchRule } from 'enums';
 import { importFromTakeout, redownloadGooglePhoto } from './takeouts';
-import path from 'path';
 import { importFromLocalStorage } from './localStorage';
+import path from 'path';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -196,15 +191,6 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
   response.json(addedTakeoutData);
 }
 
-export const importFromLocalStorageEndpoint = async (request: Request, response: Response, next: any) => {
-  const { folder } = request.body;
-  await importFromLocalStorage(folder);
-  // const takeout: Takeout = await getTakeoutById(id);
-  // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
-  // response.json(addedTakeoutData);
-  response.sendStatus(200);
-}
-
 export const deleteMediaItems = async (request: Request, response: Response, next: any) => {
 
   const { mediaItemIds } = request.body;
@@ -278,4 +264,20 @@ export const getLocalDriveImportFolders = async (request: Request, response: Res
   console.log('getLocalDriveImportFolders');
   response.json(folders);
 };
+
+export const importFromLocalStorageEndpoint = async (request: Request, response: Response, next: any) => {
+
+  const { folder } = request.body;
+
+  const dirPath = 'public/SHAFFEROTO/PNW 2024';
+  const realDirPath = await realpath(dirPath);
+  const fullPath: string = path.join(realDirPath, folder);
+  console.log('fullPath:', fullPath);
+
+  await importFromLocalStorage(fullPath);
+  // const takeout: Takeout = await getTakeoutById(id);
+  // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
+  // response.json(addedTakeoutData);
+  response.sendStatus(200);
+}
 
