@@ -36,6 +36,7 @@ import {
 import { MatchRule } from 'enums';
 import { importFromTakeout, redownloadGooglePhoto } from './takeouts';
 import path from 'path';
+import { importFromLocalStorage } from './localStorage';
 
 export const getVersion = (request: Request, response: Response, next: any) => {
   console.log('getVersion');
@@ -197,6 +198,7 @@ export const importFromTakeoutEndpoint = async (request: Request, response: Resp
 
 export const importFromLocalStorageEndpoint = async (request: Request, response: Response, next: any) => {
   const { folder } = request.body;
+  await importFromLocalStorage(folder);
   // const takeout: Takeout = await getTakeoutById(id);
   // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
   // response.json(addedTakeoutData);
