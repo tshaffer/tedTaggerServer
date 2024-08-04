@@ -236,40 +236,20 @@ export const redownloadMediaItemEndpoint = async (request: Request, response: Re
   response.sendStatus(200);
 }
 
-// export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
-
-//   const projectRoot = process.cwd();
-//   const relativeDirPath: string = request.query.dirPath as string;
-//   const absoluteDirPath = path.resolve(projectRoot, relativeDirPath);
-
-//   console.log('absoluteDirPath:', absoluteDirPath);
-
-//   const files: string[] = await getSubdirectories(absoluteDirPath);
-//   console.log('files:', files);
-//   response.json(files);
-// }
-
 const realpath = promisify(fs.realpath);
 
 export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
-  
-  // const dirPath = request.query.dirPath as string;
-// async function getSubdirectoriesFromFs(dirPath: string): Promise<string[]> {
-  
-// const dirPath = '/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/SHAFFEROTO';
-const dirPath = '/Volumes/SHAFFEROTO';
 
-try {
-    // Resolve the real path in case the directory is a symlink
+  const dirPath = request.query.dirPath as string;
+
+  try {
     const realDirPath = await realpath(dirPath);
-
-    const dirents = await fs.promises.readdir(realDirPath, { withFileTypes: true });
+    const dirents: fs.Dirent[] = await fs.promises.readdir(realDirPath, { withFileTypes: true });
     const files = dirents
-      .filter(dirent => dirent.isFile())
+      .filter(dirent => dirent.isDirectory())
       .map(dirent => path.join(realDirPath, dirent.name));
     console.log('files:', files);
     response.json(files);
-    // return files;
   } catch (err) {
     if (err.code === 'EACCES') {
       console.error('Permission denied:', err.path);
