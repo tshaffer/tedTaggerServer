@@ -26,7 +26,7 @@ import {
   clearDeletedMediaItems,
   removeDeletedMediaItem,
   redownloadMediaItemEndpoint,
-  getSubdirectoriesFromFs,
+  getLocalDriveImportFolders,
 } from '../controllers';
 import { createPhotosToDisplaySpec } from '../utilities/utilities';
 
@@ -54,7 +54,7 @@ export class Routes {
     app.get('/api/v1/takeouts', getTakeouts);
     app.get('/api/v1/deletedMediaItems', getDeletedMediaItems);
 
-    app.get('/api/v1/subdirectoriesFromFs', getSubdirectoriesFromFs);
+    app.get('/api/v1/localDriveImportFolders', getLocalDriveImportFolders);
 
     app.post('/api/v1/deleteMediaItems', deleteMediaItems);
     app.post('/api/v1/clearDeletedMediaItems', clearDeletedMediaItems);

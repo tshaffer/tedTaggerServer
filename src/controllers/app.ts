@@ -238,18 +238,16 @@ export const redownloadMediaItemEndpoint = async (request: Request, response: Re
 
 const realpath = promisify(fs.realpath);
 
-export const getSubdirectoriesFromFs = async (request: Request, response: Response, next: any) => {
-
-  const dirPath = request.query.dirPath as string;
-
+export const getSubdirectoriesFromFs = async (dirPath: string): Promise<string[]> => {
   try {
     const realDirPath = await realpath(dirPath);
     const dirents: fs.Dirent[] = await fs.promises.readdir(realDirPath, { withFileTypes: true });
     const files = dirents
       .filter(dirent => dirent.isDirectory())
-      .map(dirent => path.join(realDirPath, dirent.name));
+      // .map(dirent => path.join(realDirPath, dirent.name));
+      .map(dirent => dirent.name);
     console.log('files:', files);
-    response.json(files);
+    return files;
   } catch (err) {
     if (err.code === 'EACCES') {
       console.error('Permission denied:', err.path);
@@ -263,3 +261,11 @@ export const getSubdirectoriesFromFs = async (request: Request, response: Respon
     throw err;
   }
 }
+
+export const getLocalDriveImportFolders = async (request: Request, response: Response, next: any) => {
+  const dirPath = 'public/SHAFFEROTO/PNW 2024';
+  const folders: string[] = await getSubdirectoriesFromFs(dirPath);
+  console.log('getLocalDriveImportFolders');
+  response.json(folders);
+};
+
