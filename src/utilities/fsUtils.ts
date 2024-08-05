@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import * as nodeDir from 'node-dir';
 
-const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.heic', '.HEIC'];
+const imageFileExtensions = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.heic', '.HEIC', '.nef', '.NEF'];
 
 // interface MatchedPhoto {
 //   imageFilePath: string;

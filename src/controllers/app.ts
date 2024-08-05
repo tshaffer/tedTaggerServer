@@ -276,9 +276,7 @@ export const importFromLocalStorageEndpoint = async (request: Request, response:
   console.log('fullPath:', fullPath);
 
   await importFromLocalStorage(fullPath);
-  // const takeout: Takeout = await getTakeoutById(id);
-  // const addedTakeoutData: AddedTakeoutData = await importFromTakeout(takeout.albumName, takeout.path);
-  // response.json(addedTakeoutData);
+  
   response.sendStatus(200);
 }
 

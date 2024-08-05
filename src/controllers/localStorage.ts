@@ -13,25 +13,39 @@ const { promisify } = require('util');
 const fs = require('fs');
 const convert = require('heic-convert');
 
+const gm = require('gm').subClass({ imageMagick: true });
+
 export const importFromLocalStorage = async (localStorageFolder: string): Promise<any> => {
 
   console.log('importFromLocalStorage: ', localStorageFolder);
 
   // get the mediaItems associated with the images in the localStorageFolder
   console.log('invoke getImageFilePaths');
-  const heicFilePaths: string[] = getImageFilePaths(localStorageFolder);
+  // const heicFilePaths: string[] = getImageFilePaths(localStorageFolder);
+  const nefFilePaths: string[] = getImageFilePaths(localStorageFolder);
 
-  console.log('invoke convertHEICFilesToJPEG');
-  const jpegFilePaths: string[] = await convertHEICFilesToJPEG(heicFilePaths);
+  const nefFilePath: string = nefFilePaths[0];
+  console.log('nefFilePath: ', nefFilePath);
+  const exifData: Tags = await retrieveExifData(nefFilePath);
+  console.log('exifData: ', exifData);
+  const isoCreateDate: string | null = await convertCreateDateToISO(exifData);
+  console.log('isoCreateDate: ', isoCreateDate);
+  const geoData: GeoData | null = await extractGeoData(exifData);
+  console.log('geoData: ', geoData);
+  await convertNefToJpeg(nefFilePath);
+  console.log('conversion complete');
+  
+  // console.log('invoke convertHEICFilesToJPEG');
+  // const jpegFilePaths: string[] = await convertHEICFilesToJPEG(heicFilePaths);
 
-  console.log('invoke getLocalStorageMediaItems');
-  const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(heicFilePaths, jpegFilePaths);
+  // console.log('invoke getLocalStorageMediaItems');
+  // const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(heicFilePaths, jpegFilePaths);
 
-  // // skip step that checks for image file existence in db
+  // // // skip step that checks for image file existence in db
 
-  // // add the mediaItems to the db
-  console.log('invoke addMediaItemsFromLocalStorage');
-  await addMediaItemsFromLocalStorage(localStorageFolder, localStorageMediaItems);
+  // // // add the mediaItems to the db
+  // console.log('invoke addMediaItemsFromLocalStorage');
+  // await addMediaItemsFromLocalStorage(localStorageFolder, localStorageMediaItems);
 
   console.log('importFromLocalStorage complete');
   return Promise.resolve();
@@ -188,4 +202,16 @@ const addMediaItemsFromLocalStorage = async (localStorageFolder: string, mediaIt
   }
 
   return [];
+}
+
+
+const convertNefToJpeg = async (inputFilePath: string): Promise<any> => {
+  const outputFilePath = inputFilePath.replace('.NEF', '.JPG');
+  if (path.extname(inputFilePath).toLowerCase() === '.nef') {
+    gm(inputFilePath)
+      .write(outputFilePath, (err: any) => {
+        if (err) throw err;
+        console.log(`Converted ${inputFilePath} to JPEG`);
+      });
+  }
 }
