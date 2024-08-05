@@ -9,18 +9,26 @@ import path from 'path';
 import { DateTime } from 'luxon';
 import { addMediaItemToMediaItemsDBTable } from './dbInterface';
 
+const { promisify } = require('util');
+const fs = require('fs');
+const convert = require('heic-convert');
+
 export const importFromLocalStorage = async (localStorageFolder: string): Promise<any> => {
 
   console.log('importFromLocalStorage');
   console.log('localStorageFolder:', localStorageFolder);
 
   // get the mediaItems associated with the images in the localStorageFolder
-  const imageFilePaths: string[] = getImageFilePaths(localStorageFolder);
-  const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(imageFilePaths);
+  const heicFilePaths: string[] = getImageFilePaths(localStorageFolder);
+  console.log('convertHEICFilesToJPEG', localStorageFolder, heicFilePaths.length);
 
-  // skip step that checks for image file existence in db
+  const jpegFilePaths: string[] = await convertHEICFilesToJPEG(heicFilePaths);
 
-  // add the mediaItems to the db
+  const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(heicFilePaths, jpegFilePaths);
+
+  // // skip step that checks for image file existence in db
+
+  // // add the mediaItems to the db
   await addMediaItemsFromLocalStorage(localStorageFolder, localStorageMediaItems);
 
   console.log('localStorageMediaItems:', localStorageMediaItems.length);
@@ -28,19 +36,56 @@ export const importFromLocalStorage = async (localStorageFolder: string): Promis
   return Promise.resolve();
 }
 
-async function getLocalStorageMediaItems(imageFilePaths: string[]): Promise<MediaItem[]> {
+async function convertHEICFilesToJPEG(heicFilePaths: string[]): Promise<string[]> {
 
-  const mediaItems: MediaItem[] = await Promise.all(imageFilePaths.map(async (imageFilePath) => {
-    const mediaItem: MediaItem = await getLocalStorageMediaItem(imageFilePath);
+  console.log('convertHEICFilesToJPEG', heicFilePaths);
+
+  const jpegFilePaths: string[] = [];
+
+  for (const heicFilePath of heicFilePaths) {
+    if (heicFilePath.endsWith('.HEIC')) {
+      console.log('heicFilePath:', heicFilePath);
+      const jpegFilePath: string = await convertHEICFileToJPEG(heicFilePath);
+      console.log('jpegFilePath:', jpegFilePath);
+      jpegFilePaths.push(jpegFilePath);
+    } else {
+      console.error('File is not a HEIC file:', heicFilePath);
+    }
+  }
+
+  return jpegFilePaths;
+}
+
+async function convertHEICFileToJPEG(heicFilePath: string): Promise<string> {
+
+  console.log('convertHEICFileToJPEG:', heicFilePath);
+
+  const inputBuffer = await promisify(fs.readFile)(heicFilePath);
+  const outputBuffer = await convert({
+    buffer: inputBuffer, // the HEIC file buffer
+    format: 'JPEG',      // output format
+    quality: 1           // the jpeg compression quality, between 0 and 1
+  });
+
+  const jpegFilePath = heicFilePath.replace('.HEIC', '.JPG');
+  await promisify(fs.writeFile)(jpegFilePath, outputBuffer);
+  console.log('jpegFilePath:', jpegFilePath);
+  return jpegFilePath;
+}
+
+async function getLocalStorageMediaItems(heicFilePaths: string[], imageFilePaths: string[]): Promise<MediaItem[]> {
+
+  const mediaItems: MediaItem[] = await Promise.all(imageFilePaths.map(async (imageFilePath, index) => {
+    const mediaItem: MediaItem = await getLocalStorageMediaItem(heicFilePaths[index], imageFilePath);
     return mediaItem;
   }));
 
   return mediaItems;
 }
 
-async function getLocalStorageMediaItem(fullPath: string): Promise<MediaItem> {
+async function getLocalStorageMediaItem(heicFilePath: string, fullPath: string): Promise<MediaItem> {
 
-  const exifData: Tags = await retrieveExifData(fullPath);
+  const exifData: Tags = await retrieveExifData(heicFilePath);
   const isoCreateDate: string | null = await convertCreateDateToISO(exifData);
   const geoData: GeoData | null = await extractGeoData(exifData);
 
@@ -51,7 +96,7 @@ async function getLocalStorageMediaItem(fullPath: string): Promise<MediaItem> {
     filePath: fullPath,
     productUrl: null,
     baseUrl: null,
-    mimeType: valueOrNull(exifData.MIMEType),
+    mimeType: 'image/jpeg',
     creationTime: isoCreateDate,
     width: exifData.ImageWidth, // or ExifImageWidth?
     height: exifData.ImageHeight, // or ExifImageHeight?
@@ -134,7 +179,7 @@ const addMediaItemsFromLocalStorage = async (localStorageFolder: string, mediaIt
     if (isImageFile(mediaItemFileName)) {
       const fileSuffix = path.extname(mediaItemFileName);
       const shardedFileName = mediaItem.googleId + fileSuffix;
-      
+
       const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItem.googleId);
       // const from = path.join(takeoutFolder, googleFileName);
       const where = path.join(baseDir, shardedFileName);
