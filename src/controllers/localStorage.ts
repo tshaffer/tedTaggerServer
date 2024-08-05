@@ -8,24 +8,36 @@ import { isNil } from "lodash";
 import path from 'path';
 import { DateTime } from 'luxon';
 
-export const importFromLocalStorage = async (folder: string): Promise<any> => {
+export const importFromLocalStorage = async (localStorageFolder: string): Promise<any> => {
 
   console.log('importFromLocalStorage');
-  console.log('folder:', folder);
+  console.log('localStorageFolder:', localStorageFolder);
 
-  const imageFilePaths: string[] = getImageFilePaths(folder);
-  // console.log('imageFiles:', imageFilePaths);
+  const imageFilePaths: string[] = getImageFilePaths(localStorageFolder);
+  const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(imageFilePaths);
 
-  const index = 0;
-  const fullPath = imageFilePaths[index];
+  console.log('localStorageMediaItems:', localStorageMediaItems.length);
+
+  return Promise.resolve();
+}
+
+async function getLocalStorageMediaItems(imageFilePaths: string[]): Promise<MediaItem[]> {
+  
+  const mediaItems: MediaItem[] = await Promise.all(imageFilePaths.map(async (imageFilePath) => {
+    const mediaItem: MediaItem = await getLocalStorageMediaItem(imageFilePath);
+    return mediaItem;
+  }));
+
+  return mediaItems;
+}
+
+async function getLocalStorageMediaItem(fullPath: string): Promise<MediaItem> {
 
   const exifData: Tags = await retrieveExifData(fullPath);
-  console.log('exifData:', exifData);
-
   const isoCreateDate: string | null = await convertCreateDateToISO(exifData);
   const geoData: GeoData | null = await extractGeoData(exifData);
 
-  const dbMediaItem: MediaItem = {
+  const mediaItem: MediaItem = {
     googleId: uuidv4(),
     fileName: path.basename(fullPath),
     albumId: '',
@@ -43,12 +55,9 @@ export const importFromLocalStorage = async (folder: string): Promise<any> => {
     geoData,
     people: null,
     keywordNodeIds: []
-
   }
 
-  console.log('dbMediaItem:', dbMediaItem);
-
-  return Promise.resolve();
+  return mediaItem;
 }
 
 async function extractGeoData(tags: Tags): Promise<GeoData | null> {
