@@ -5,7 +5,7 @@ import { AuthService } from "../auth";
 import { GoogleAlbum, GoogleMediaItem } from "googleTypes";
 import { GooglePhotoAPIs, getAlbumMediaItemsFromGoogle, getGoogleAlbumDataByName } from "./googlePhotos";
 import { addAutoPersonKeywordsToDb, addMediaItemToMediaItemsDBTable, deleteMediaItemsFromDb, getAllMediaItemsFromDb, getAutoPersonKeywordNodesFromDb, getKeywordsFromDb, getMediaItemsInAlbumFromDb, updateMediaItemInDb } from "./dbInterface";
-import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory } from "../utilities";
+import { getJsonFilePaths, getImageFilePaths, isImageFile, getJsonFromFile, retrieveExifData, valueOrNull, fsLocalFolderExists, fsCreateNestedDirectory, getShardedDirectory } from "../utilities";
 import { FilePathToExifTags, StringToStringLUT } from '../types';
 import { Tags } from "exiftool-vendored";
 import * as path from 'path';
@@ -387,38 +387,6 @@ export const redownloadGooglePhoto = async (mediaItem: MediaItem): Promise<any> 
 
   return redownloadMediaItem(authService, mediaItem);
 }
-
-
-
-let shardedDirectoryExistsByPath: any = {};
-
-const getShardedDirectory = async (mediaItemsDir: string, photoId: string): Promise<string> => {
-
-  const numChars = photoId.length;
-  const targetDirectory = path.join(
-    mediaItemsDir,
-    photoId.charAt(numChars - 2),
-    photoId.charAt(numChars - 1),
-  );
-
-  return fsLocalFolderExists(targetDirectory)
-    .then((dirExists: boolean) => {
-      shardedDirectoryExistsByPath[targetDirectory] = true;
-      if (dirExists) {
-        return Promise.resolve(targetDirectory);
-      }
-      else {
-        return fsCreateNestedDirectory(targetDirectory)
-          .then(() => {
-            return Promise.resolve(targetDirectory);
-          });
-      }
-    })
-    .catch((err: Error) => {
-      console.log(err);
-      return Promise.reject();
-    });
-};
 
 const createGroups = (mediaItems: MediaItem[], groupSize: number): MediaItem[][] => {
 

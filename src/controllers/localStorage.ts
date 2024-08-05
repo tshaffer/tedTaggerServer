@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ExifDateTime, Tags } from "exiftool-vendored";
 
-import { getImageFilePaths, retrieveExifData, valueOrNull } from "../utilities";
+import { getImageFilePaths, getShardedDirectory, isImageFile, retrieveExifData, valueOrNull } from "../utilities";
 import { GeoData, MediaItem } from "entities";
 import { isNil } from "lodash";
 import path from 'path';
@@ -13,8 +13,14 @@ export const importFromLocalStorage = async (localStorageFolder: string): Promis
   console.log('importFromLocalStorage');
   console.log('localStorageFolder:', localStorageFolder);
 
+  // get the mediaItems associated with the images in the localStorageFolder
   const imageFilePaths: string[] = getImageFilePaths(localStorageFolder);
   const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(imageFilePaths);
+
+  // skip step that checks for image file existence in db
+
+  // add the mediaItems to the db
+  await addMediaItemsFromLocalStorage(localStorageMediaItems);
 
   console.log('localStorageMediaItems:', localStorageMediaItems.length);
 
@@ -22,7 +28,7 @@ export const importFromLocalStorage = async (localStorageFolder: string): Promis
 }
 
 async function getLocalStorageMediaItems(imageFilePaths: string[]): Promise<MediaItem[]> {
-  
+
   const mediaItems: MediaItem[] = await Promise.all(imageFilePaths.map(async (imageFilePath) => {
     const mediaItem: MediaItem = await getLocalStorageMediaItem(imageFilePath);
     return mediaItem;
@@ -116,3 +122,30 @@ async function convertCreateDateToISO(tags: Tags): Promise<string | null> {
     return null;
   }
 }
+
+const addMediaItemsFromLocalStorage = async (mediaItems: MediaItem[]): Promise<any> => {
+
+  // TEDTODO - should not be hard coded
+  const mediaItemsDir = '/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images';
+
+  for (const mediaItem of mediaItems) {
+    const mediaItemFileName = mediaItem.fileName;
+    if (isImageFile(mediaItemFileName)) {
+      const fileSuffix = path.extname(mediaItemFileName);
+      const shardedFileName = mediaItem.googleId + fileSuffix;
+      
+      const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItem.googleId);
+      // const from = path.join(takeoutFolder, googleFileName);
+      const where = path.join(baseDir, shardedFileName);
+
+      console.log('mediaItemFileName', mediaItemFileName);
+      console.log('shardedFileName:', shardedFileName);
+      console.log('baseDir:', baseDir);
+      console.log('where:', where);
+
+    }
+  }
+
+  return [];
+}
+
