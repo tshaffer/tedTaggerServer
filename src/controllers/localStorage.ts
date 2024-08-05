@@ -15,38 +15,35 @@ const convert = require('heic-convert');
 
 export const importFromLocalStorage = async (localStorageFolder: string): Promise<any> => {
 
-  console.log('importFromLocalStorage');
-  console.log('localStorageFolder:', localStorageFolder);
+  console.log('importFromLocalStorage: ', localStorageFolder);
 
   // get the mediaItems associated with the images in the localStorageFolder
+  console.log('invoke getImageFilePaths');
   const heicFilePaths: string[] = getImageFilePaths(localStorageFolder);
-  console.log('convertHEICFilesToJPEG', localStorageFolder, heicFilePaths.length);
 
+  console.log('invoke convertHEICFilesToJPEG');
   const jpegFilePaths: string[] = await convertHEICFilesToJPEG(heicFilePaths);
 
+  console.log('invoke getLocalStorageMediaItems');
   const localStorageMediaItems: MediaItem[] = await getLocalStorageMediaItems(heicFilePaths, jpegFilePaths);
 
   // // skip step that checks for image file existence in db
 
   // // add the mediaItems to the db
+  console.log('invoke addMediaItemsFromLocalStorage');
   await addMediaItemsFromLocalStorage(localStorageFolder, localStorageMediaItems);
 
-  console.log('localStorageMediaItems:', localStorageMediaItems.length);
-
+  console.log('importFromLocalStorage complete');
   return Promise.resolve();
 }
 
 async function convertHEICFilesToJPEG(heicFilePaths: string[]): Promise<string[]> {
 
-  console.log('convertHEICFilesToJPEG', heicFilePaths);
-
   const jpegFilePaths: string[] = [];
 
   for (const heicFilePath of heicFilePaths) {
     if (heicFilePath.endsWith('.HEIC')) {
-      console.log('heicFilePath:', heicFilePath);
       const jpegFilePath: string = await convertHEICFileToJPEG(heicFilePath);
-      console.log('jpegFilePath:', jpegFilePath);
       jpegFilePaths.push(jpegFilePath);
     } else {
       console.error('File is not a HEIC file:', heicFilePath);
@@ -58,8 +55,6 @@ async function convertHEICFilesToJPEG(heicFilePaths: string[]): Promise<string[]
 
 async function convertHEICFileToJPEG(heicFilePath: string): Promise<string> {
 
-  console.log('convertHEICFileToJPEG:', heicFilePath);
-
   const inputBuffer = await promisify(fs.readFile)(heicFilePath);
   const outputBuffer = await convert({
     buffer: inputBuffer, // the HEIC file buffer
@@ -69,7 +64,6 @@ async function convertHEICFileToJPEG(heicFilePath: string): Promise<string> {
 
   const jpegFilePath = heicFilePath.replace('.HEIC', '.JPG');
   await promisify(fs.writeFile)(jpegFilePath, outputBuffer);
-  console.log('jpegFilePath:', jpegFilePath);
   return jpegFilePath;
 }
 
@@ -139,7 +133,7 @@ async function convertCreateDateToISO(tags: Tags): Promise<string | null> {
     if (!createDate) {
       throw new Error('CreateDate not found in EXIF tags');
     }
-
+    
     let isoDateString: string;
 
     if (createDate instanceof ExifDateTime) {
@@ -181,13 +175,7 @@ const addMediaItemsFromLocalStorage = async (localStorageFolder: string, mediaIt
       const shardedFileName = mediaItem.googleId + fileSuffix;
 
       const baseDir: string = await getShardedDirectory(mediaItemsDir, mediaItem.googleId);
-      // const from = path.join(takeoutFolder, googleFileName);
       const where = path.join(baseDir, shardedFileName);
-
-      console.log('mediaItemFileName', mediaItemFileName);
-      console.log('shardedFileName:', shardedFileName);
-      console.log('baseDir:', baseDir);
-      console.log('where:', where);
 
       mediaItem.filePath = where;
 
