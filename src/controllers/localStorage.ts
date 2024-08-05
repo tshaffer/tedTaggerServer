@@ -2,11 +2,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ExifDateTime, Tags } from "exiftool-vendored";
 
-import { getImageFilePaths, getShardedDirectory, isImageFile, retrieveExifData, valueOrNull } from "../utilities";
+import { fsCopyFile, getImageFilePaths, getShardedDirectory, isImageFile, retrieveExifData, valueOrNull } from "../utilities";
 import { GeoData, MediaItem } from "entities";
 import { isNil } from "lodash";
 import path from 'path';
 import { DateTime } from 'luxon';
+import { addMediaItemToMediaItemsDBTable } from './dbInterface';
 
 export const importFromLocalStorage = async (localStorageFolder: string): Promise<any> => {
 
@@ -20,7 +21,7 @@ export const importFromLocalStorage = async (localStorageFolder: string): Promis
   // skip step that checks for image file existence in db
 
   // add the mediaItems to the db
-  await addMediaItemsFromLocalStorage(localStorageMediaItems);
+  await addMediaItemsFromLocalStorage(localStorageFolder, localStorageMediaItems);
 
   console.log('localStorageMediaItems:', localStorageMediaItems.length);
 
@@ -123,7 +124,7 @@ async function convertCreateDateToISO(tags: Tags): Promise<string | null> {
   }
 }
 
-const addMediaItemsFromLocalStorage = async (mediaItems: MediaItem[]): Promise<any> => {
+const addMediaItemsFromLocalStorage = async (localStorageFolder: string, mediaItems: MediaItem[]): Promise<any> => {
 
   // TEDTODO - should not be hard coded
   const mediaItemsDir = '/Users/tedshaffer/Documents/Projects/tedTaggerServer/public/images';
@@ -143,9 +144,15 @@ const addMediaItemsFromLocalStorage = async (mediaItems: MediaItem[]): Promise<a
       console.log('baseDir:', baseDir);
       console.log('where:', where);
 
+      mediaItem.filePath = where;
+
+      await addMediaItemToMediaItemsDBTable(mediaItem);
+
+      const sourcePath: string = path.join(localStorageFolder, mediaItemFileName);
+      console.log('copy file from: ', sourcePath, ' to: ', where);
+      await fsCopyFile(sourcePath, where);
     }
   }
 
   return [];
 }
-

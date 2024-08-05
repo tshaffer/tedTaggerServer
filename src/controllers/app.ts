@@ -259,9 +259,10 @@ export const getSubdirectoriesFromFs = async (dirPath: string): Promise<string[]
 }
 
 export const getLocalDriveImportFolders = async (request: Request, response: Response, next: any) => {
+  console.log('getLocalDriveImportFolders entry');
   const dirPath = 'public/SHAFFEROTO/PNW 2024';
   const folders: string[] = await getSubdirectoriesFromFs(dirPath);
-  console.log('getLocalDriveImportFolders');
+  console.log('getLocalDriveImportFolders', folders);
   response.json(folders);
 };
 

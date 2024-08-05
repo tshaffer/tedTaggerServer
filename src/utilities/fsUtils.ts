@@ -155,3 +155,12 @@ export const fsDeleteFiles = async (filePaths: string[]) => {
 
   return Promise.all(promises);
 }
+
+export const fsCopyFile = async (source: string, destination: string): Promise<void> => {
+  try {
+    await fs.copy(source, destination);
+    console.log(`File copied from ${source} to ${destination}`);
+  } catch (err) {
+    console.error(`Error copying file from ${source} to ${destination}:`, err);
+  }
+}
